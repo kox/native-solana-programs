@@ -15,10 +15,9 @@ mod tests {
             0x2a, 0x68, 0x9a, 0xef, 0xbd, 0xed, 0x26, 0xef
         ]);
 
-        println!("{}", program_id.to_string());
-
         // Create a unique `signer` Pubkey and calculate the PDA `vault` based on the `signer` and `program_id`
         let signer = Pubkey::new_unique();
+        // Compute the `vault` PDA using `signer` and `program_id`, retrieving the bump seed
         let (vault, bump) =
             Pubkey::try_find_program_address(&[signer.as_ref()], &program_id).unwrap();
 
