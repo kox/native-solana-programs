@@ -1,0 +1,21 @@
+[package]
+name = "hello-id-program"
+version = "0.1.0"
+edition = "2021"
+
+[package.metadata.solana]
+program-id = "22222222222222222222222222222222222222222222"
+program-dependencies = []
+account-dependencies = []
+
+[lib]
+crate-type = ["cdylib", "lib"]
+
+[dependencies]
+solana-program = { workspace = true }
+
+[dev-dependencies]
+solana-program-test = { workspace =  true }
+
+[features]
+test-sbf = []

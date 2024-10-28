@@ -1,0 +1,16 @@
+[workspace]
+resolver = "2"
+members = [
+    "hello_basic",
+]
+
+[workspace.package]
+authors = ["Native Solana Programs by KoX"]
+homepage = "https://cognis.es"
+repository = "https://github.com/kox/native-rust-programs"
+license = "Apache-2.0"
+
+[workspace.dependencies]
+pinocchio = "0.6.0"
+solana-program = "2.0.14"
+solana-program-test = "2.0.14"
