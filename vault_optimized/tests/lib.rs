@@ -15,6 +15,8 @@ mod tests {
             0x2a, 0x68, 0x9a, 0xef, 0xbd, 0xed, 0x26, 0xef
         ]);
 
+        println!("{}", program_id.to_string());
+
         // Create a unique `signer` Pubkey and calculate the PDA `vault` based on the `signer` and `program_id`
         let signer = Pubkey::new_unique();
         let (vault, bump) =
@@ -31,7 +33,7 @@ mod tests {
         );
 
         // Initialize the Mollusk virtual machine for testing, loading the program binary
-        let mollusk = Mollusk::new(&program_id, "../target/deploy/vault_native");
+        let mollusk = Mollusk::new(&program_id, "../target/deploy/vault_optimized");
 
         // Process the withdraw instruction with mock account data for `signer` and `vault`
         let result: mollusk_svm::result::InstructionResult = mollusk.process_instruction(
