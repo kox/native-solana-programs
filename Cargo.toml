@@ -1,7 +1,8 @@
 [workspace]
 resolver = "2"
 members = [
-    "hello_basic",
+    "hello_basic", 
+    "vault_native",
 ]
 
 [workspace.package]
@@ -11,6 +12,8 @@ repository = "https://github.com/kox/native-rust-programs"
 license = "Apache-2.0"
 
 [workspace.dependencies]
+mollusk-svm = "0.0.6"
 pinocchio = "0.6.0"
 solana-program = "2.0.14"
 solana-program-test = "2.0.14"
+solana-sdk = "2.0.14"

@@ -10,6 +10,7 @@ Clone and install with cargo
 ## Building and testing
 
 > cargo build-sbf
+
 > cargo test-sbf
 
 If you want to do it individual builds, try with `-- -p $$program$$`
