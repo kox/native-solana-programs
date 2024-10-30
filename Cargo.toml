@@ -1,8 +1,10 @@
 [workspace]
 resolver = "2"
 members = [
-    "hello_basic", "vault_based", 
-    "vault_native", "vault_optimized",
+    "hello_basic", 
+    "vault_native", 
+    "vault_optimized",
+#    "vault_based", not working on my arch
 ]
 
 [workspace.package]

@@ -7,4 +7,12 @@ homepage.workspace = true
 repository.workspace = true
 license.workspace = true
 
-[dependencies]
+[lib]
+crate-type = ["cdylib", "lib"]
+
+[dev-dependencies]
+mollusk-svm = { workspace = true }
+solana-sdk = { workspace = true }
+
+[features]
+test-sbf = []
