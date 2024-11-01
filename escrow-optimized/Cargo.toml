@@ -1,0 +1,24 @@
+[package]
+name = "escrow-optimized"
+version = "0.1.0"
+edition = "2021"
+authors.workspace = true
+homepage.workspace = true
+repository.workspace = true
+license.workspace = true
+
+[lib]
+crate-type = ["cdylib", "lib"]
+
+[dependencies]
+five8_const = { workspace = true }
+pinocchio = { workspace = true }
+pinocchio-system = { workspace = true}
+pinocchio-token = { workspace = true}
+solana-nostd-sha256 = { workspace = true }
+
+[dev-dependencies]
+mollusk-svm = { workspace = true }
+mollusk-token = { workspace = true }
+solana-sdk = { workspace = true }
+spl-token = { workspace = true }
