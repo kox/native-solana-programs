@@ -10,5 +10,7 @@ dist
 bun.lockb
 *.sqlite
 tmp
-
+.vscode
+.launch.json
+.settings.json
 !/clients/js/dist
