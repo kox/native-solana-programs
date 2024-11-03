@@ -3,7 +3,7 @@ resolver = "2"
 members = [ 
     "escrow-improve", 
     "escrow-native", "fundraiser", 
-    "escrow-optimized",
+    # "escrow-optimized",
     "hello_basic", 
     "vault_native", 
     "vault_optimized",

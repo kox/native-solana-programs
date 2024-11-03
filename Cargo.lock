@@ -65,17 +65,6 @@ dependencies = [
 
 [[package]]
 name = "ahash"
-version = "0.7.8"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "891477e0c6a8957309ee5c45a6368af3ae14bb510732d2684ffa19af310920f9"
-dependencies = [
- "getrandom 0.2.15",
- "once_cell",
- "version_check",
-]
-
-[[package]]
-name = "ahash"
 version = "0.8.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e89da841a80418a9b391ebaea17f5c112ffaaa96f621d2c285b5174da76b9011"
@@ -515,7 +504,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "115e54d64eb62cdebad391c19efc9dce4981c690c85a33a12199d99bb9546fee"
 dependencies = [
  "borsh-derive 0.10.4",
- "hashbrown 0.12.3",
+ "hashbrown 0.13.2",
 ]
 
 [[package]]
@@ -1305,21 +1294,6 @@ name = "escrow-native"
 version = "0.1.0"
 
 [[package]]
-name = "escrow-optimized"
-version = "0.1.0"
-dependencies = [
- "five8_const",
- "mollusk-svm",
- "mollusk-token",
- "pinocchio",
- "pinocchio-system",
- "pinocchio-token",
- "solana-nostd-sha256",
- "solana-sdk",
- "spl-token",
-]
-
-[[package]]
 name = "event-listener"
 version = "2.5.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1416,9 +1390,13 @@ version = "0.1.0"
 dependencies = [
  "bytemuck",
  "five8_const",
+ "mollusk-svm",
+ "mollusk-token",
  "pinocchio",
  "pinocchio-system",
  "pinocchio-token",
+ "solana-sdk",
+ "spl-token",
 ]
 
 [[package]]
@@ -1607,9 +1585,6 @@ name = "hashbrown"
 version = "0.12.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8a9ee70c43aaf417c914396645a0fa852624801b24ebb7ae78fe8272889ac888"
-dependencies = [
- "ahash 0.7.8",
-]
 
 [[package]]
 name = "hashbrown"
@@ -1617,7 +1592,7 @@ version = "0.13.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "43a3c133739dddd0d2990f9a4bdf8eb4b21ef50e4851ca85ab661199821d510e"
 dependencies = [
- "ahash 0.8.11",
+ "ahash",
 ]
 
 [[package]]
@@ -3846,7 +3821,7 @@ version = "2.0.14"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "5e977795cc73edd5187084f81b97327bf023a1d3b28905e910d3929796c014b0"
 dependencies = [
- "ahash 0.8.11",
+ "ahash",
  "lazy_static",
  "log",
  "rustc_version",
@@ -3982,7 +3957,7 @@ version = "2.0.14"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e4e7809a71f40bc1d551c86203f11c463926dcfe5a892e74357de618aeffe13a"
 dependencies = [
- "ahash 0.8.11",
+ "ahash",
  "bincode",
  "bv",
  "caps",
