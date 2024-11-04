@@ -83,40 +83,26 @@ mod tests {
 
         assert_eq!(maker_pubkey.to_string(), maker.to_string());
 
-        let remaining_amount_bytes: [u8; 8]  = data[32..40].try_into().expect("Expecting 8 bytes for remaning_amount");
+        let mint_bytes: [u8; 32]  = data[32..64].try_into().expect("Expecting 8 bytes for mint");
+        let mint_pubkey = Pubkey::from(mint_bytes);
 
-        let remaining_amount = u64::from_le_bytes(remaining_amount_bytes);
+        assert_eq!(mint_pubkey.to_string(), mint.to_string());
 
-        assert_eq!(remaining_amount, 100_000_000u64);
+        let remaining_amount_bytes: [u8; 8]  = data[64..72].try_into().expect("Expecting 8 bytes for remaining_amount");
+        let remaining_amount_result = u64::from_le_bytes(remaining_amount_bytes);
 
-        // let (fundraiser_pub, fundraiser_account) = result.resulting_accounts.get(1).unwrap();
+        assert_eq!(remaining_amount_result, 100_000_000u64);
 
-        // assert_eq!(fundraiser_pub.to_bytes(), fundraiser.to_bytes());
+        let slot_bytes: [u8; 8]  = data[72..80].try_into().expect("Expecting 8 bytes for slot");
+        let slot_result = u64::from_le_bytes(slot_bytes);
 
-        // let data = fundraiser_account.data();
+        assert_eq!(slot_result, slot);
 
-        // assert_eq!(data.len(), 81);
+        /* Not using the bump yet
+        let bump_bytes: [u8; 1]  = data[80..81].try_into().expect("Expecting 1 bytes for bump");
+        let bump_result = u8::from_le_bytes(bump_bytes);
 
-        // let's deserialize
-
-        // let fundraiser_data = Fundraiser::from_account_info_unchecked(AccountInfo::from(fundraiser_account.to_account_shared_data().into()));
-
-        // let data: Fundraiser = fundraiser_account.deserialize_data().unwrap();
-        
-        println!("hello data");
-        /* let fundraiser_account_info = AccountInfo::from(fundraiser_account);
-
-        let deserialize_fundraiser = Fundraiser::from_account_info_unchecked(&fundraiser_account_info);
-        assert_eq!(deserialized_fundraiser.maker(), maker); */
-
-        // let data = fundraiser_account.data();
-        
-
-        // New step: Read and validate the data in the fundraiser account
-        /* let fundraiser_account = mollusk.get_account(&fundraiser).unwrap();
-        let fundraiser_data = fundraiser_account.data(); */
-
-
-
+        assert_eq!(bump_result, bump); 
+        */
     }
 }
