@@ -37,12 +37,6 @@ mod tests {
             100_000_000u64.to_le_bytes().to_vec(),  // reamining_amount
             slot.to_le_bytes().to_vec(),            // slot target
             1u8.to_le_bytes().to_vec()              // bump (i'm hesitating about it as the acocunt is created aside)
-
-            // 100u64.to_le_bytes().to_vec(),
-            /* maker_ta_b.to_bytes().to_vec(),
-            mint_a.to_bytes().to_vec(),
-            mint_b.to_bytes().to_vec(),
-            1_000_000u64.to_le_bytes().to_vec(), */
         ].concat();
 
         let instruction = Instruction::new_with_bytes(
@@ -72,30 +66,35 @@ mod tests {
         assert!(!result.program_result.is_err());
 
         // Fixinig the random error as the order is not quarantee
-        let funraiser_result_account = result.get_account(&fundraiser).expect("Failed to find funraiser account");
+        let fundraiser_result_account = result.get_account(&fundraiser).expect("Failed to find funraiser account");
 
-        assert_eq!(funraiser_result_account.data().len(), 81);
+        // Fundraiser should be own by the program id to be able to modify it
+        assert_eq!(*fundraiser_result_account.owner(), program_id);
 
-        let data = funraiser_result_account.data();
+        // Fundraiser should have a length of 81
+        assert_eq!(fundraiser_result_account.data().len(), Fundraiser::LEN);
 
+        // Let's verify the data
+        let data = fundraiser_result_account.data();
+
+        // Maker Pubkey
         let pubkey_bytes: [u8; 32] = data[0..32].try_into().expect("Expected 32 bytes for pubkey");
         let maker_pubkey = Pubkey::from(pubkey_bytes);
-
         assert_eq!(maker_pubkey.to_string(), maker.to_string());
 
+        // Mint Pubkey
         let mint_bytes: [u8; 32]  = data[32..64].try_into().expect("Expecting 8 bytes for mint");
         let mint_pubkey = Pubkey::from(mint_bytes);
-
         assert_eq!(mint_pubkey.to_string(), mint.to_string());
 
+        // Remaining Amount
         let remaining_amount_bytes: [u8; 8]  = data[64..72].try_into().expect("Expecting 8 bytes for remaining_amount");
         let remaining_amount_result = u64::from_le_bytes(remaining_amount_bytes);
-
         assert_eq!(remaining_amount_result, 100_000_000u64);
 
+        // Slot
         let slot_bytes: [u8; 8]  = data[72..80].try_into().expect("Expecting 8 bytes for slot");
         let slot_result = u64::from_le_bytes(slot_bytes);
-
         assert_eq!(slot_result, slot);
 
         /* Not using the bump yet
