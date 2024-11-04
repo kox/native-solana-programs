@@ -69,22 +69,16 @@ mod tests {
             ],
         );
 
-
-
         assert!(!result.program_result.is_err());
 
-        println!("{}", result.resulting_accounts.get(1).unwrap().0.to_string());
-        println!("{}", fundraiser.to_string());
-        
-        assert_eq!(result.resulting_accounts.get(1).unwrap().0.to_string(), fundraiser.to_string());
+        // Fixinig the random error as the order is not quarantee
+        let funraiser_result_account = result.get_account(&fundraiser).expect("Failed to find funraiser account");
 
-        assert_eq!(result.resulting_accounts.get(1).unwrap().1.data().len(), 81);
+        assert_eq!(funraiser_result_account.data().len(), 81);
 
-        let data = result.resulting_accounts.get(1).unwrap().1.data();
+        let data = funraiser_result_account.data();
 
         let pubkey_bytes: [u8; 32] = data[0..32].try_into().expect("Expected 32 bytes for pubkey");
-
-        // let pubkey = &data [0..31];
         let maker_pubkey = Pubkey::from(pubkey_bytes);
 
         assert_eq!(maker_pubkey.to_string(), maker.to_string());
