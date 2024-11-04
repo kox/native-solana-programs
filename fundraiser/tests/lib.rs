@@ -5,7 +5,7 @@ mod tests {
     use fundraiser::Fundraiser;
 
     use mollusk_svm::{ program, Mollusk };
-    use solana_sdk::{account::AccountSharedData, account_info::AccountInfo, clock::Slot, deserialize_utils, instruction::{AccountMeta, Instruction}, pubkey::Pubkey};
+    use solana_sdk::{account::{AccountSharedData, ReadableAccount}, account_info::AccountInfo, clock::Slot, deserialize_utils, instruction::{AccountMeta, Instruction}, pubkey::Pubkey};
 
     #[test]
     fn initialize() {
@@ -73,12 +73,39 @@ mod tests {
 
         assert!(!result.program_result.is_err());
 
-        let (fundraiser_pub, fundraiser_account) = result.resulting_accounts.get(1).unwrap();
+        println!("{}", result.resulting_accounts.get(1).unwrap().0.to_string());
+        println!("{}", fundraiser.to_string());
+        
+        assert_eq!(result.resulting_accounts.get(1).unwrap().0.to_string(), fundraiser.to_string());
 
-        assert_eq!(fundraiser_pub, &fundraiser);
+        assert_eq!(result.resulting_accounts.get(1).unwrap().1.data().len(), 81);
+
+        let data = result.resulting_accounts.get(1).unwrap().1.data();
+
+        let pubkey_bytes: [u8; 32] = data[0..32].try_into().expect("Expected 32 bytes for pubkey");
+
+        // let pubkey = &data [0..31];
+        let maker_pubkey = Pubkey::from(pubkey_bytes);
+
+        assert_eq!(maker_pubkey.to_string(), maker.to_string());
+
+        let remaining_amount_bytes: [u8; 8]  = data[32..40].try_into().expect("Expecting 8 bytes for remaning_amount");
+
+        let remaining_amount = u64::from_le_bytes(remaining_amount_bytes);
+
+        assert_eq!(remaining_amount, 100_000_000u64);
+
+        // let (fundraiser_pub, fundraiser_account) = result.resulting_accounts.get(1).unwrap();
+
+        // assert_eq!(fundraiser_pub.to_bytes(), fundraiser.to_bytes());
+
+        // let data = fundraiser_account.data();
+
+        // assert_eq!(data.len(), 81);
+
         // let's deserialize
 
-        let fundraiser_data = Fundraiser::from_account_info_unchecked(fundraiser_account);
+        // let fundraiser_data = Fundraiser::from_account_info_unchecked(AccountInfo::from(fundraiser_account.to_account_shared_data().into()));
 
         // let data: Fundraiser = fundraiser_account.deserialize_data().unwrap();
         
