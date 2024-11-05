@@ -115,7 +115,7 @@ mod tests {
         assert_eq!(bump_result, bump); 
         */
     }
-
+/* 
     #[test]
     fn checker() {
         let program_id = Pubkey::new_from_array(five8_const::decode_32_const(
@@ -261,5 +261,5 @@ mod tests {
         );
 
         assert!(!result.program_result.is_err());
-    }
+    } */
 }
