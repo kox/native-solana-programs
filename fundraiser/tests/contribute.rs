@@ -451,7 +451,7 @@ mod contribute_tests {
             vec![
                 AccountMeta::new(contributor, true),
                 AccountMeta::new(contributor_ta, false),
-                AccountMeta::new(fundraiser, true),  // we need to modify it
+                AccountMeta::new(fundraiser, false),  // we need to modify it
                 AccountMeta::new(mint, false),
                 AccountMeta::new(vault, false),
                 AccountMeta::new(authority, true),

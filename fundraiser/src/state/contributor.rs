@@ -13,7 +13,7 @@ use pinocchio::account_info::AccountInfo;
 pub struct Contributor(*const u8);
 
 impl Contributor {
-    pub const LEN: usize = 9;
+    pub const LEN: usize = 8;
 
     #[inline(always)]
     pub fn from_account_info_unchecked(account_info: &AccountInfo) -> Self {
@@ -30,7 +30,7 @@ impl Contributor {
         unsafe  { *(self.0 as *const u64) }
     }
 
-    pub fn bump(&self) -> u8 {
+    /* pub fn bump(&self) -> u8 {
         unsafe { *(self.0.add(8) as *const u8) }
-    }
+    } */
 }

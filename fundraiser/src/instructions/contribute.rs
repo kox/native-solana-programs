@@ -73,15 +73,16 @@ pub fn contribute(
         amount,
     }.invoke()?;
 
-    
-    
-    // Update Fundraiser remaining. Checking overflow will crash so i don't think it's needed... it could be done on the client 
     unsafe {
-        // let fundraiser_mut = fundraiser.borrow_mut_data_unchecked();
-        
-        // let new_value = fundraiser_account.remaining_amount() - amount;
+        // Get a mutable pointer to the account's data once
+        // Calculate the new amount and store it in the correct position (32-byte offset)
+        *(fundraiser.borrow_mut_data_unchecked().as_mut_ptr().add(64) as *mut [u8; 8]) = (fundraiser_account.remaining_amount() - amount).to_le_bytes();
 
-        fundraiser.borrow_mut_data_unchecked()[64..72].copy_from_slice(&(fundraiser_account.remaining_amount() - amount).to_le_bytes());
+        // iusing copy_from_slice adds 2 CU
+        // fundraiser.borrow_mut_data_unchecked()[64..72].copy_from_slice(&(fundraiser_account.remaining_amount() - amount).to_le_bytes());
+
+        // using check_sub adds 8 CU
+        // *(fundraiser.borrow_mut_data_unchecked().as_mut_ptr().add(64) as *mut [u8; 8]) = (fundraiser_account.remaining_amount().checked_sub(amount).ok_or(ProgramError::ArithmeticOverflow))?.to_le_bytes();
     }
 
     Ok(())
