@@ -5,6 +5,8 @@ mod contribute_tests {
     use fundraiser::Fundraiser;
 
     use mollusk_svm::{ program, Mollusk };
+
+    use mollusk_token::token;
     
     use solana_sdk::{
         account::{AccountSharedData, ReadableAccount, WritableAccount}, 
@@ -508,5 +510,19 @@ mod contribute_tests {
         let slot_bytes: [u8; 8]  = data[72..80].try_into().expect("Expecting 8 bytes for slot");
         let slot_result = u64::from_le_bytes(slot_bytes);
         assert_eq!(slot_result, slot);
+
+        // Check the tokens happened
+        let updated_contributor_ta_account = result
+            .get_account(&contributor_ta)
+            .expect("Failed to find contributor token account");
+        
+        // Unpack the updated `contributor_ta` account data to read the token balance
+        let updated_contributor_ta_data: spl_token::state::Account = solana_sdk::program_pack::Pack::unpack(
+            &updated_contributor_ta_account.data(),
+        ).expect("Failed to unpack contributor token account");
+
+        // Check the balance of `contributor_ta` after contribution
+        let expected_balance = 0; // Assuming the contributor transferred all tokens to the fundraiser
+        assert_eq!(updated_contributor_ta_data.amount, expected_balance);
     }
 }

@@ -1,6 +1,6 @@
 [workspace]
 resolver = "2"
-members = [ 
+members = [ "amm", 
     "escrow-improve", 
     "escrow-native", "fundraiser", 
     # "escrow-optimized",

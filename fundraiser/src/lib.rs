@@ -7,7 +7,7 @@ use instructions::*;
 use initialize::initialize;
 use contribute::contribute;
 use checker::checker;
-use refund::refund;
+/* use refund::refund; */
 
 mod state;
 mod constants;
@@ -32,7 +32,7 @@ pub fn process_instruction(
         FundraiserInstruction::Initialize => initialize(accounts, data),
         FundraiserInstruction::Contribute => contribute(accounts, data),
         FundraiserInstruction::Checker => checker(accounts, data),
-        FundraiserInstruction::Refund => refund(accounts, instruction_data),
+        FundraiserInstruction::Refund => todo!(), // refund(accounts, instruction_data),
     }
 }
 

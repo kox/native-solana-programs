@@ -38,6 +38,7 @@ mod refund_tests {
         let mint = Pubkey::new_unique();
         let (vault, bump) = Pubkey::find_program_address(&[&fundraiser.to_bytes()], &program_id);
 
+        // We create a mint token account and define the token data
         let mut mint_account = AccountSharedData::new(
             mollusk
                 .sysvars
@@ -58,6 +59,7 @@ mod refund_tests {
         )
         .unwrap();
 
+        // We create a contributor token account and add some tokens
         let mut contributor_ta_account = AccountSharedData::new(
             mollusk
                 .sysvars
@@ -81,6 +83,7 @@ mod refund_tests {
         )
         .unwrap();
 
+        // We create a fundraiser account to store the data
         let mut fundraiser_account = AccountSharedData::new(
             mollusk
                 .sysvars
@@ -89,6 +92,28 @@ mod refund_tests {
             mem::size_of::<Fundraiser>(),
             &program_id,
         );
+
+        let mut vault_account = AccountSharedData::new(
+            mollusk
+                .sysvars
+                .rent
+                .minimum_balance(spl_token::state::Account::LEN),
+            spl_token::state::Account::LEN,
+            &spl_token::ID,
+        );
+        solana_sdk::program_pack::Pack::pack(
+            spl_token::state::Account {
+                mint: Pubkey::default(),
+                owner: vault,
+                amount: 1_000,
+                delegate: COption::None,
+                state: spl_token::state::AccountState::Initialized,
+                is_native: COption::None,
+                delegated_amount: 0,
+                close_authority: COption::None,
+            },
+            vault_account.data_as_mut_slice(),
+        ).unwrap();
 
         // Data
         let data = [

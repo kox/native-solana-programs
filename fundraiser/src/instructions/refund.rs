@@ -1,4 +1,4 @@
-use pinocchio::{account_info::AccountInfo, program_error::ProgramError, ProgramResult};
+/* use pinocchio::{account_info::AccountInfo, program_error::ProgramError, sysvars::clock::Clock, ProgramResult};
 
 use crate::state::{contributor, fundraiser};
 
@@ -34,7 +34,8 @@ pub fn refund(accounts: &[AccountInfo], data: &[u8]) -> ProgramResult {
     /* let clock = Clock::get().expect("Failed to load the clock");
 
     // Is expired the campaign? */
-    assert!(Clock::get().expect("Failed to load the clock") < fundraiser_account.slot());
+    assert!(Clock::get().expect("Failed to load the clock") > fundraiser_account.slot());
 
     Ok(())
 }
+ */

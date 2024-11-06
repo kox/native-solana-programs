@@ -101,6 +101,21 @@ dependencies = [
 ]
 
 [[package]]
+name = "amm"
+version = "0.1.0"
+dependencies = [
+ "bytemuck",
+ "five8_const",
+ "mollusk-svm",
+ "mollusk-token",
+ "pinocchio",
+ "pinocchio-system",
+ "pinocchio-token",
+ "solana-sdk",
+ "spl-token",
+]
+
+[[package]]
 name = "android-tzdata"
 version = "0.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
