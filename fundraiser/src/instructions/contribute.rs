@@ -1,7 +1,7 @@
 use pinocchio::{account_info::AccountInfo, program_error::ProgramError, sysvars::{clock::Clock, Sysvar}, ProgramResult};
 use pinocchio_token::{instructions::Transfer, state::TokenAccount};
 
-use crate::{ state::fundraiser, Fundraiser, MIN_AMOUNT_TO_RAISE };
+use crate::{ Fundraiser, MIN_AMOUNT_TO_RAISE };
 
 /// Checker
 /// Instruction signed by contributors to give their contribution in a fundraising event transfering tokens into the vault and

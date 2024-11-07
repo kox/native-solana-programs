@@ -73,6 +73,10 @@ pub fn swap(accounts: &[AccountInfo], data: &[u8]) -> ProgramResult {
         amount: in_amount,
     };
 
+    let seeds = [
+        Seed::from(config.key().as_ref())
+    ]
+
     Transfer {
         from: buyer_from,
         to: vault_from,
