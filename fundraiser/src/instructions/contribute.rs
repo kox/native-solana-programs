@@ -35,7 +35,7 @@ pub fn contribute(
         contributor, 
         contributor_ta, 
         fundraiser,
-        mint,
+        _mint,
         vault,
         _authority,
         _token_program 

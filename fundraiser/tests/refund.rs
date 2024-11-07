@@ -605,15 +605,6 @@ mod refund_tests {
             .get_account(&contributor_account)
             .expect("Faiiled to get fundrasier account");
 
-
-
-       /*  let fundraiser_account = result
-            .get_account(&fundraiser)
-            .expect("Faiiled to get fundrasier account");
-
-        let fundraiser_account_data = Fundraiser::from_account_shared_data_unchecked(fundraiser_account);
-        println!("MAKER: {}", fundraiser_account_data.maker()) */
-
         // Check the tokens happened
         let updated_contributor_ta_account = result
             .get_account(&contributor_ta)
@@ -638,12 +629,6 @@ mod refund_tests {
         let expected_balance = 1_000; // Assuming the contributor added 1000 and there was 2000, there should be 1000 left
         
         assert_eq!(updated_vault_data.amount, expected_balance);
-
-        // How can i test that contributor account was closed?
-        /* let updated_contributor_account = result
-            .get_account(contributor_account)
-            .expect("Failed to read contributor account"); */
-
     }
 
 }

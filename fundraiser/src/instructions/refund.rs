@@ -26,7 +26,7 @@ pub fn refund(accounts: &[AccountInfo], data: &[u8]) -> ProgramResult {
         contributor_account, 
         fundraiser, 
         vault, 
-        token_program
+        _token_program
     ] = accounts
     else {
         return Err(ProgramError::NotEnoughAccountKeys);
@@ -41,10 +41,10 @@ pub fn refund(accounts: &[AccountInfo], data: &[u8]) -> ProgramResult {
     // assert!(fundraiser_account.slot() == 2); 
     
 
-    assert!(Clock::get()?.slot > fundraiser_account.slot());
+    assert!(clock > fundraiser_account.slot());
 
     // Make sure that we didnt reach the goal
-    let vault_account = unsafe { TokenAccount::from_account_info_unchecked(vault) };
+    let vault_account = TokenAccount::from_account_info_unchecked(vault);
     assert!(fundraiser_account.remaining_amount() > 0u64);
  
     assert_eq!(fundraiser_account.mint(), vault_account.mint());

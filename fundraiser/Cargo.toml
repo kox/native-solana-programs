@@ -21,6 +21,7 @@ pinocchio-system = { workspace = true}
 pinocchio-token = { workspace = true}
 bytemuck = { workspace = true }
 five8_const = { workspace = true }
+solana-nostd-sha256 = { workspace = true }
 
 [dev-dependencies]
 mollusk-svm = { workspace = true }
