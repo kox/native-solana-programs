@@ -1,4 +1,12 @@
-# Native Solana Programs
+# Advanced Solana Rust Turbin3 Cohort
+
+![Advanced-Rust-Turbin3-Cohort](https://raw.githubusercontent.com/solana-turbin3/Q3T_Sol_kox/e824e102c50ef114c7f901815c50824e0dd61579/turbin3_banner.png)
+
+
+# Hi there 👋, kox here 
+[![GitHub followers](https://img.shields.io/github/followers/kox.svg?style=social&label=Follow)](https://github.com/kox?tab=followers)  ![YouTube Channel Subscribers](https://img.shields.io/youtube/channel/subscribers/UCaOQstxSGKT-W1xYa9PuVKQ)
+ ![X (formerly Twitter) Follow](https://img.shields.io/twitter/follow/enekoox)
+<br/>
 
 ## Description
 This repository intends to be a WIP to build basic, optimized and based solana programs to write, research and test them. 
