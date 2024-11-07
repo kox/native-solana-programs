@@ -25,4 +25,4 @@ impl TryFrom<&u8> for FundraiserInstruction {
             _ => Err(ProgramError::InvalidInstructionData)
         }
     }
-    }
+}

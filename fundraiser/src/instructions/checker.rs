@@ -1,8 +1,8 @@
 use pinocchio::{account_info::AccountInfo, instruction::{Seed, Signer}, program_error::ProgramError, sysvars::{clock::Clock, Sysvar}, ProgramResult};
-use pinocchio_token::{instructions::Transfer, state::TokenAccount};
-use solana_nostd_sha256::hashv;
 
-use crate::{Fundraiser, ID};
+use crate::{ Fundraiser, ID };
+use pinocchio_token::{instructions::{CloseAccount, Transfer}, state::TokenAccount};
+use solana_nostd_sha256::hashv;
 
 const PDA_MARKER: &[u8; 21] = b"ProgramDerivedAddress";
 
@@ -23,17 +23,17 @@ pub fn checker(
     accounts: &[AccountInfo], 
     data: &[u8]
 ) -> ProgramResult {
-    let [maker, maker_ta, fundraiser, vault, _token_program] = accounts else {
-        return Err(ProgramError::NotEnoughAccountKeys)
+     let [maker, maker_ta, fundraiser, vault, _token_program] = accounts else {
+        return Err(ProgramError::BorshIoError)
     };
-
+    
     // It should have ended the time period
     let fundraiser_account = Fundraiser::from_account_info(fundraiser);
     assert!(Clock::get()?.slot > fundraiser_account.slot());
 
     // it should have reach the goal remaining_account == 0
     assert_eq!(fundraiser_account.remaining_amount(), 0);
-
+    
     assert!(maker.is_signer());
     assert_eq!(&fundraiser_account.maker(), maker.key());
 
@@ -53,7 +53,7 @@ pub fn checker(
 
     // Let's validate is the correct vault
     assert_eq!(&vault_pda, vault.key().as_ref());
-/* 
+
     // Let's get the amount of tokens funded in the vault
     let vault_account = TokenAccount::from_account_info_unchecked(vault);
     let amount = vault_account.amount();
@@ -64,22 +64,15 @@ pub fn checker(
         to: maker_ta,
         authority: vault,
         amount,
-    }.invoke_signed(&signers)?; */
+    }.invoke_signed(&signers)?; 
+
 
     // once we transfer the tokens, i guess we would like to get the lamports too :D
+    CloseAccount {
+        account: vault,
+        destination: maker,
+        authority: vault,
+    }.invoke_signed(&signers)?;
 
-
-    /* let [maker, fundraiser, _system_program] = accounts else {
-        return Err(ProgramError::NotEnoughAccountKeys)
-    };
-
-    assert!(fundraiser.is_signer());
-
-    // Copy maker key
-    unsafe { *(fundraiser.borrow_mut_data_unchecked().as_mut_ptr() as *mut Pubkey) = *maker.key() };
-
-    // Copy everything after maker
-    unsafe { *(fundraiser.borrow_mut_data_unchecked().as_mut_ptr().add(32) as *mut [u8; 49]) = *(data.as_ptr() as *const [u8; 49])};
- */
     Ok(())
 }
