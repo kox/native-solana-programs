@@ -48,10 +48,4 @@ impl Fundraiser {
     pub fn bump(&self) -> u8 {
         unsafe { *(self.0.add(80) as *const u8) }
     }
-
-
-
-    /* pub fn remaining_account(&self) -> u64 {
-        unsafe  { *(self.0.add(40) as *const Pubkey) }
-    } */
 }

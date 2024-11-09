@@ -1,6 +1,5 @@
 use pinocchio::{account_info::AccountInfo, program_error::ProgramError, sysvars::{clock::Clock, Sysvar}, ProgramResult};
-use pinocchio_token::{instructions::Transfer, state::TokenAccount};
-use solana_nostd_sha256::hashv;
+use pinocchio_token::instructions::Transfer;
 
 use crate::{ Contributor, Fundraiser, ID, MIN_AMOUNT_TO_RAISE, PDA_MARKER };
 
@@ -38,9 +37,9 @@ pub fn contribute(
         contributor_ta,
         contributor_account,
         fundraiser,
-        _mint,
         vault,
-        _token_program 
+        _authority,
+        _token_program
     ] = accounts else {
         return Err(ProgramError::BorshIoError);
     };
@@ -52,9 +51,6 @@ pub fn contribute(
     let clock = Clock::get().expect("Failed to load the clock");
     assert!(clock.slot < fundraiser_account.slot());
 
-    // Get fundraiser account data. Internally we check the ownership and LEN to avoid possible attacks
-    let contributor_account_data = Contributor::from_account_info(contributor_account);
-    
     // Check funder_ta matches our fundraiser mint account??? Do i need to test this? I don't think so.
     /* assert_eq!(
         &TokenAccount::from_account_info(vault).mint(),
@@ -65,9 +61,8 @@ pub fn contribute(
     // vault, and then claim some non owned tokens. To validate the vault, we will try to generate the PDA in a cheap way, modifying the 
     // fundraiser key with a bump passed via parameter.
     
-    
     // Let's generate the vault with the fundraiser and the bump (data)
-    let vault_pda = hashv(&[
+    /* let vault_pda = hashv(&[
         fundraiser.key().as_ref(),
         fundraiser_account.bump().to_le_bytes().as_ref(),
         ID.as_ref(),
@@ -75,7 +70,7 @@ pub fn contribute(
     ]);
 
     // Let's validate is the correct vault
-    assert_eq!(&vault_pda, vault.key().as_ref());
+    assert_eq!(&vault_pda, vault.key().as_ref()); */
 
     // TODO: do we need the bump in the fundraiser? as we pass it via param, probably we can delete it.
 
@@ -99,6 +94,9 @@ pub fn contribute(
 
         // using check_sub adds 8 CU
         // *(fundraiser.borrow_mut_data_unchecked().as_mut_ptr().add(64) as *mut [u8; 8]) = (fundraiser_account.remaining_amount().checked_sub(amount).ok_or(ProgramError::ArithmeticOverflow))?.to_le_bytes();
+
+        // we update the contributor account data
+        *(contributor_account.borrow_mut_data_unchecked().as_mut_ptr() as *mut [u8; 8]) = amount.to_le_bytes();
     }
 
     Ok(())

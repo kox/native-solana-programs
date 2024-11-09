@@ -3,7 +3,7 @@ mod checker_tests {
     use mollusk_svm::Mollusk;
     use std::{mem, u64};
 
-    use fundraiser::Fundraiser;
+    use fundraiser::{ Fundraiser, Contributor };
 
     use solana_sdk::{
         account::{AccountSharedData, ReadableAccount, WritableAccount},

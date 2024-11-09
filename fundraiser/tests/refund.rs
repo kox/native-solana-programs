@@ -316,23 +316,3 @@ mod refund_tests {
         contributor_account
     }
 }
-
-/*
-fn get_instruction(
-    accounts
-    signer: Pubkey,
-    contributor: Pubkey,
-    contributor_ta: Pubkey,
-    contributor_account: Pubkey,
-    fundraiser: Pubkey,
-    mint: Pubkey,
-    vault: Pubkey,
-    num_instruction: u8
-) -> Instruction {
-    let data = [vec![num_instruction]].concat();
-
-    Instruction::new_with_bytes(
-        PROGRAM_ID,
-        &data,
-        vec![
-            AccountMeta::new(contributor, true), */
