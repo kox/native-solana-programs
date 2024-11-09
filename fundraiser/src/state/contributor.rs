@@ -29,8 +29,4 @@ impl Contributor {
     pub fn amount(&self) -> u64 {
         unsafe  { *(self.0 as *const u64) }
     }
-
-    /* pub fn bump(&self) -> u8 {
-        unsafe { *(self.0.add(8) as *const u8) }
-    } */
 }

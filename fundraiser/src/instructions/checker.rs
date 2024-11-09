@@ -11,7 +11,6 @@ use pinocchio_token::{
     instructions::{CloseAccount, Transfer},
     state::TokenAccount,
 };
-use solana_nostd_sha256::hashv;
 
 /// Checker
 /// Instruction signed by maker to retrieve the funds from the vault and send them to the maker token account
@@ -33,14 +32,14 @@ pub fn checker(accounts: &[AccountInfo], _data: &[u8]) -> ProgramResult {
         maker_ta, 
         fundraiser, 
         vault, 
-        authority, 
+        authority,
         _token_program
     ] = accounts else {
         return Err(ProgramError::NotEnoughAccountKeys);
     };
 
     // It should have ended the time period
-    /* let fundraiser_account = Fundraiser::from_account_info(fundraiser);
+    let fundraiser_account = Fundraiser::from_account_info(fundraiser);
     assert!(Clock::get()?.slot > fundraiser_account.slot());
 
     // it should have reach the goal remaining_account == 0
@@ -49,8 +48,8 @@ pub fn checker(accounts: &[AccountInfo], _data: &[u8]) -> ProgramResult {
     assert!(maker.is_signer());
 
     // We verify that person trying to claim the 
-    assert_eq!(&fundraiser_account.maker(), maker.key()); */
- /*
+    assert_eq!(&fundraiser_account.maker(), maker.key());
+ 
     // We need to sign on behalf of the program
     let bump_binding = fundraiser_account.bump().to_le_bytes();
     let seeds = [Seed::from(fundraiser.key().as_ref()), Seed::from(bump_binding.as_ref())];
@@ -64,34 +63,14 @@ pub fn checker(accounts: &[AccountInfo], _data: &[u8]) -> ProgramResult {
         to: maker_ta,
         authority,
         amount: vault_amount,
-    }.invoke_signed(&signers)?; */
+    }.invoke_signed(&signers)?;
 
-    // Let's generate the vault with the fundraiser and the bump (data)
-    /* let vault_pda = hashv(&[fundraiser.key().as_ref(), &bump, ID.as_ref(), PDA_MARKER]);
-
-    // Let's validate is the correct vault
-    assert_eq!(&vault_pda, vault.key().as_ref());
-
-    // Let's get the amount of tokens funded in the vault
-    let vault_account = unsafe { TokenAccount::from_account_info_unchecked(vault)? };
-    let amount = vault_account.amount();
-
-    // Now we can transfer the tokens doing the CPI
-    Transfer {
-        from: vault,
-        to: maker_ta,
-        authority: vault,
-        amount,
-    }
-    .invoke_signed(&signers)?; */
-
-    // once we transfer the tokens, i guess we would like to get the lamports too :D
-    /* CloseAccount {
+    CloseAccount {
         account: vault,
         destination: maker,
         authority,
     }
-    .invoke_signed(&signers)?; */
+    .invoke_signed(&signers)?;
 
     Ok(())
 }

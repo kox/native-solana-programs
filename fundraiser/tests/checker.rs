@@ -34,7 +34,7 @@ mod checker_tests {
             Pubkey::find_program_address(&[&fundraiser.to_bytes()], &PROGRAM_ID);
 
         // Data
-        let data = [vec![2]/* , vec![bump] */].concat();
+        let data = [vec![2]].concat();
 
         // Instruction
         let instruction = Instruction::new_with_bytes(
@@ -68,7 +68,7 @@ mod checker_tests {
                 (
                     vault,
                     get_ta(&mollusk, mint, authority, 2_000u64, token_program),
-                ), // not used  
+                ), // not used                                                           // not used
                 (
                     authority,
                     AccountSharedData::new(1_000_000_000, 0, &Pubkey::default()),
@@ -77,9 +77,9 @@ mod checker_tests {
             ],
         );
 
-        assert!(result.program_result.is_err());
+        assert!(result.program_result.is_err()); // It should fail
     }
-
+ 
     #[test]
     fn should_fail_when_not_reach_goal() {
         let mut mollusk = Mollusk::new(&PROGRAM_ID, "../target/deploy/fundraiser");
