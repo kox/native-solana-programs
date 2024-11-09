@@ -19,13 +19,14 @@ use crate::{ Contributor, Fundraiser };
 /// Checks:
 /// > It shoud not have expired, otherwise someone could get the tokens after
 ///
-pub fn refund(accounts: &[AccountInfo], data: &[u8]) -> ProgramResult {
+pub fn refund(accounts: &[AccountInfo], _data: &[u8]) -> ProgramResult {
     let [
         contributor, 
         contributor_ta, 
         contributor_account, 
         fundraiser, 
-        vault, 
+        vault,
+        authority,
         _token_program
     ] = accounts
     else {
@@ -38,28 +39,28 @@ pub fn refund(accounts: &[AccountInfo], data: &[u8]) -> ProgramResult {
 
     // Is expired the campaign? 
     let clock = Clock::get()?.slot;
-    // assert!(fundraiser_account.slot() == 2); 
-    
-
     assert!(clock > fundraiser_account.slot());
 
     // Make sure that we didnt reach the goal
-    let vault_account = TokenAccount::from_account_info_unchecked(vault);
     assert!(fundraiser_account.remaining_amount() > 0u64);
- 
-    assert_eq!(fundraiser_account.mint(), vault_account.mint());
     
-    let bump = [unsafe { *(data.as_ptr() as *const u8) }];
+    let vault_account = unsafe { TokenAccount::from_account_info_unchecked(vault)? };
     
-     
-    let seeds = [Seed::from(fundraiser.key().as_ref()), Seed::from(&bump)];
+    // Do we need to be sure about this check? what can go wrong?
+    assert_eq!(&fundraiser_account.mint(), vault_account.mint());
+    
+    // We need to sign on behalf of the program
+    let bump_binding = fundraiser_account.bump().to_le_bytes();
+    let seeds = [Seed::from(fundraiser.key().as_ref()), Seed::from(bump_binding.as_ref())];
+
+    // let seeds = [Seed::from(fundraiser.key().as_ref()), Seed::from(fundraiser_account.bump().to_le_bytes().as_ref())];
     let signers = [Signer::from(&seeds)];
  
     // We transfer contributor amount to its owner
     Transfer {
         from: vault,
         to: contributor_ta,
-        authority: vault,
+        authority,
         amount: Contributor::from_account_info(contributor_account).amount(),
     }.invoke_signed(&signers)?;
 

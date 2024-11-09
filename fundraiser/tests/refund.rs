@@ -1,34 +1,25 @@
 #[cfg(test)]
 mod refund_tests {
+    use fundraiser::{Contributor, Fundraiser};
+    use mollusk_svm::Mollusk;
+    use solana_sdk::{
+        account::{AccountSharedData, ReadableAccount, WritableAccount},
+        instruction::{AccountMeta, Instruction},
+        program_option::COption,
+        program_pack::Pack,
+        pubkey::Pubkey,
+    };
+    use spl_token::state::AccountState;
     use std::mem;
 
-    use fundraiser::{ Fundraiser, Contributor };
-
-    use mollusk_svm::{ program, Mollusk };
-
-    
-    use solana_sdk::{
-        account::{AccountSharedData, ReadableAccount, WritableAccount}, 
-        account_info::AccountInfo, 
-        clock::Slot, 
-        deserialize_utils, 
-        instruction::{AccountMeta, Instruction}, 
-        program_option::COption, pubkey::Pubkey,
-        program_pack::Pack,
-    };
-    
-    use spl_token::state::AccountState;
+    const PROGRAM_ID: Pubkey = Pubkey::new_from_array(five8_const::decode_32_const(
+        "22222222222222222222222222222222222222222222",
+    ));
 
     #[test]
-    fn should_fail_when_still_running() {
-        let program_id = Pubkey::new_from_array(five8_const::decode_32_const(
-            "22222222222222222222222222222222222222222222",
-        ));
-
-        let mut mollusk = Mollusk::new(&program_id, "../target/deploy/fundraiser");
-
+    fn should_fail_when_campaign_still_running() {
+        let mut mollusk = Mollusk::new(&PROGRAM_ID, "../target/deploy/fundraiser");
         mollusk_token::token::add_program(&mut mollusk);
-
         let (token_program, token_program_account) = mollusk_token::token::keyed_account();
 
         let maker = Pubkey::new_unique();
@@ -37,158 +28,16 @@ mod refund_tests {
         let contributor_account = Pubkey::new_unique();
         let fundraiser = Pubkey::new_unique();
         let mint = Pubkey::new_unique();
-        let (vault, bump) = Pubkey::find_program_address(&[&fundraiser.to_bytes()], &program_id);
-
-        let mut vault_account = AccountSharedData::new(
-            mollusk
-                .sysvars
-                .rent
-                .minimum_balance(spl_token::state::Account::LEN),
-            spl_token::state::Account::LEN,
-            &spl_token::ID,
-        );
-
-        // We create a fundraiser account to store the data
-        let mut fundraiser_account = AccountSharedData::new(
-            mollusk
-                .sysvars
-                .rent
-                .minimum_balance(mem::size_of::<Fundraiser>()),
-            mem::size_of::<Fundraiser>(),
-            &program_id,
-        );
-        fundraiser_account.set_data_from_slice(
-            &[
-                maker.to_bytes().to_vec(),
-                mint.to_bytes().to_vec(),
-                100_000_000u64.to_le_bytes().to_vec(),
-                u64::MAX.to_le_bytes().to_vec(), // Maximum slot so for sure it should fail
-                1u8.to_le_bytes().to_vec(),
-            ]
-            .concat(),
-        );
-
-        // We create a mint token account and define the token data
-        let mut mint_account = AccountSharedData::new(
-            mollusk
-                .sysvars
-                .rent
-                .minimum_balance(spl_token::state::Mint::LEN),
-            spl_token::state::Mint::LEN,
-            &token_program,
-        );
-        solana_sdk::program_pack::Pack::pack(
-            spl_token::state::Mint {
-                mint_authority: COption::None,
-                supply: 100_000_000_000,
-                decimals: 6,
-                is_initialized: true,
-                freeze_authority: COption::None,
-            },
-            mint_account.data_as_mut_slice(),
-        )
-        .unwrap();
-
-        // We create a contributor token account and add some tokens
-        let mut contributor_ta_account = AccountSharedData::new(
-            mollusk
-                .sysvars
-                .rent
-                .minimum_balance(spl_token::state::Account::LEN),
-            spl_token::state::Account::LEN,
-            &token_program,
-        );
-        solana_sdk::program_pack::Pack::pack(
-            spl_token::state::Account {
-                mint: mint,
-                owner: contributor,
-                amount: 1_000_000,
-                delegate: COption::None,
-                state: AccountState::Initialized,
-                is_native: COption::None,
-                delegated_amount: 0,
-                close_authority: COption::None,
-            },
-            contributor_ta_account.data_as_mut_slice(),
-        )
-        .unwrap();
-
-        // We create a fundraiser account to store the data
-        let mut fundraiser_account = AccountSharedData::new(
-            mollusk
-                .sysvars
-                .rent
-                .minimum_balance(mem::size_of::<Fundraiser>()),
-            mem::size_of::<Fundraiser>(),
-            &program_id,
-        );
-        fundraiser_account.set_data_from_slice(
-            &[
-                maker.to_bytes().to_vec(),
-                mint.to_bytes().to_vec(),
-                100_000_000u64.to_le_bytes().to_vec(),
-                u64::MAX.to_le_bytes().to_vec(), // Maximum slot so for sure it should fail
-                1u8.to_le_bytes().to_vec(),
-            ]
-            .concat(),
-        );
-
-        let mut vault_account = AccountSharedData::new(
-            mollusk
-                .sysvars
-                .rent
-                .minimum_balance(spl_token::state::Account::LEN),
-            spl_token::state::Account::LEN,
-            &spl_token::ID,
-        );
-        solana_sdk::program_pack::Pack::pack(
-            spl_token::state::Account {
-                mint: Pubkey::default(),
-                owner: vault,
-                amount: 1_000,
-                delegate: COption::None,
-                state: spl_token::state::AccountState::Initialized,
-                is_native: COption::None,
-                delegated_amount: 0,
-                close_authority: COption::None,
-            },
-            vault_account.data_as_mut_slice(),
-        ).unwrap();
+        let vault = Pubkey::new_unique();
+        let (authority, bump) =
+            Pubkey::find_program_address(&[&fundraiser.to_bytes()], &PROGRAM_ID);
 
         // Data
-        let data = [
-            vec![3],
-            vec![bump],
-        ]
-        .concat();
+        let data = [vec![3]].concat();
 
-        // We create the vault too
-        let mut vault_account = AccountSharedData::new(
-            mollusk
-                .sysvars
-                .rent
-                .minimum_balance(spl_token::state::Account::LEN),
-            spl_token::state::Account::LEN,
-            &token_program,
-        );
-        solana_sdk::program_pack::Pack::pack(
-            spl_token::state::Account {
-                mint,
-                owner: vault,
-                amount: 1_000_000,
-                delegate: COption::None,
-                state: AccountState::Initialized,
-                is_native: COption::None,
-                delegated_amount: 0,
-                close_authority: COption::None,
-            },
-            vault_account.data_as_mut_slice(),
-        )
-        .unwrap();
- 
         // Instruction
         let instruction = Instruction::new_with_bytes(
-            program_id,
+            PROGRAM_ID,
             &data,
             vec![
                 AccountMeta::new(contributor, true),
@@ -196,6 +45,7 @@ mod refund_tests {
                 AccountMeta::new(contributor_account, false),
                 AccountMeta::new(fundraiser, false),
                 AccountMeta::new(vault, false),
+                AccountMeta::new(authority, false),
                 AccountMeta::new(token_program, false),
             ],
         );
@@ -207,21 +57,24 @@ mod refund_tests {
                     contributor,
                     AccountSharedData::new(1_000_000_000, 0, &Pubkey::default()),
                 ),
-                (contributor_ta, contributor_ta_account),
-                (contributor_account, 
-                    AccountSharedData::new(
-                        mollusk
-                            .sysvars
-                            .rent
-                            .minimum_balance(Contributor::LEN),
-                        Contributor::LEN,
-                        &program_id,
-                    ),
+                (
+                    contributor_ta,
+                    get_ta(&mollusk, mint, contributor, u64::MAX, token_program),
+                ), // not used
+                (contributor_account, get_contributor(&mollusk, 0u64)), // not used
+                (
+                    fundraiser,
+                    get_fundraiser(&mollusk, maker, mint, 100_000_000u64, u64::MAX, bump),
+                ), // slot max -> campaign still running
+                (
+                    vault,
+                    get_ta(&mollusk, mint, authority, 2_000u64, token_program),
+                ), // not used                                                           // not used
+                (
+                    authority,
+                    AccountSharedData::new(1_000_000_000, 0, &Pubkey::default()),
                 ),
-                (fundraiser, fundraiser_account),
-                (vault, vault_account),
                 (token_program, token_program_account),
-                
             ],
         );
 
@@ -229,15 +82,10 @@ mod refund_tests {
     }
 
     #[test]
-    fn should_fail_when_campaign_ended_without_reaching_goal() {
-        let program_id = Pubkey::new_from_array(five8_const::decode_32_const(
-            "22222222222222222222222222222222222222222222",
-        ));
-
-        let mut mollusk = Mollusk::new(&program_id, "../target/deploy/fundraiser");
-
+    fn should_fail_when_campaign_ended_reached_goal() {
+        let mut mollusk = Mollusk::new(&PROGRAM_ID, "../target/deploy/fundraiser");
         mollusk_token::token::add_program(&mut mollusk);
-
+        mollusk.sysvars.warp_to_slot(2); // We start in slot 2 so we can test expired (0)
         let (token_program, token_program_account) = mollusk_token::token::keyed_account();
 
         let maker = Pubkey::new_unique();
@@ -246,158 +94,16 @@ mod refund_tests {
         let contributor_account = Pubkey::new_unique();
         let fundraiser = Pubkey::new_unique();
         let mint = Pubkey::new_unique();
-        let (vault, bump) = Pubkey::find_program_address(&[&fundraiser.to_bytes()], &program_id);
-
-        let mut vault_account = AccountSharedData::new(
-            mollusk
-                .sysvars
-                .rent
-                .minimum_balance(spl_token::state::Account::LEN),
-            spl_token::state::Account::LEN,
-            &spl_token::ID,
-        );
-
-        // We create a fundraiser account to store the data
-        let mut fundraiser_account = AccountSharedData::new(
-            mollusk
-                .sysvars
-                .rent
-                .minimum_balance(mem::size_of::<Fundraiser>()),
-            mem::size_of::<Fundraiser>(),
-            &program_id,
-        );
-        fundraiser_account.set_data_from_slice(
-            &[
-                maker.to_bytes().to_vec(),
-                mint.to_bytes().to_vec(),
-                100_000_000u64.to_le_bytes().to_vec(),
-                0u64.to_le_bytes().to_vec(), // we encorage that it has ended
-                1u8.to_le_bytes().to_vec(),
-            ]
-            .concat(),
-        );
-
-        // We create a mint token account and define the token data
-        let mut mint_account = AccountSharedData::new(
-            mollusk
-                .sysvars
-                .rent
-                .minimum_balance(spl_token::state::Mint::LEN),
-            spl_token::state::Mint::LEN,
-            &token_program,
-        );
-        solana_sdk::program_pack::Pack::pack(
-            spl_token::state::Mint {
-                mint_authority: COption::None,
-                supply: 100_000_000_000,
-                decimals: 6,
-                is_initialized: true,
-                freeze_authority: COption::None,
-            },
-            mint_account.data_as_mut_slice(),
-        )
-        .unwrap();
-
-        // We create a contributor token account and add some tokens
-        let mut contributor_ta_account = AccountSharedData::new(
-            mollusk
-                .sysvars
-                .rent
-                .minimum_balance(spl_token::state::Account::LEN),
-            spl_token::state::Account::LEN,
-            &token_program,
-        );
-        solana_sdk::program_pack::Pack::pack(
-            spl_token::state::Account {
-                mint: mint,
-                owner: contributor,
-                amount: 1_000_000,
-                delegate: COption::None,
-                state: AccountState::Initialized,
-                is_native: COption::None,
-                delegated_amount: 0,
-                close_authority: COption::None,
-            },
-            contributor_ta_account.data_as_mut_slice(),
-        )
-        .unwrap();
-
-        // We create a fundraiser account to store the data
-        let mut fundraiser_account = AccountSharedData::new(
-            mollusk
-                .sysvars
-                .rent
-                .minimum_balance(mem::size_of::<Fundraiser>()),
-            mem::size_of::<Fundraiser>(),
-            &program_id,
-        );
-        fundraiser_account.set_data_from_slice(
-            &[
-                maker.to_bytes().to_vec(),
-                mint.to_bytes().to_vec(),
-                1u64.to_le_bytes().to_vec(), // still has remaining amount
-                u64::MAX.to_le_bytes().to_vec(), // Maximum slot so for sure it should fail
-                1u8.to_le_bytes().to_vec(),
-            ]
-            .concat(),
-        );
-
-        let mut vault_account = AccountSharedData::new(
-            mollusk
-                .sysvars
-                .rent
-                .minimum_balance(spl_token::state::Account::LEN),
-            spl_token::state::Account::LEN,
-            &spl_token::ID,
-        );
-        solana_sdk::program_pack::Pack::pack(
-            spl_token::state::Account {
-                mint: Pubkey::default(),
-                owner: vault,
-                amount: 1_000,
-                delegate: COption::None,
-                state: spl_token::state::AccountState::Initialized,
-                is_native: COption::None,
-                delegated_amount: 0,
-                close_authority: COption::None,
-            },
-            vault_account.data_as_mut_slice(),
-        ).unwrap();
+        let vault = Pubkey::new_unique();
+        let (authority, bump) =
+            Pubkey::find_program_address(&[&fundraiser.to_bytes()], &PROGRAM_ID);
 
         // Data
-        let data = [
-            vec![3],
-            vec![bump],
-        ]
-        .concat();
+        let data = [vec![3]].concat();
 
-        // We create the vault too
-        let mut vault_account = AccountSharedData::new(
-            mollusk
-                .sysvars
-                .rent
-                .minimum_balance(spl_token::state::Account::LEN),
-            spl_token::state::Account::LEN,
-            &token_program,
-        );
-        solana_sdk::program_pack::Pack::pack(
-            spl_token::state::Account {
-                mint,
-                owner: vault,
-                amount: 1_000_000,
-                delegate: COption::None,
-                state: AccountState::Initialized,
-                is_native: COption::None,
-                delegated_amount: 0,
-                close_authority: COption::None,
-            },
-            vault_account.data_as_mut_slice(),
-        )
-        .unwrap();
- 
         // Instruction
         let instruction = Instruction::new_with_bytes(
-            program_id,
+            PROGRAM_ID,
             &data,
             vec![
                 AccountMeta::new(contributor, true),
@@ -405,6 +111,7 @@ mod refund_tests {
                 AccountMeta::new(contributor_account, false),
                 AccountMeta::new(fundraiser, false),
                 AccountMeta::new(vault, false),
+                AccountMeta::new(authority, false),
                 AccountMeta::new(token_program, false),
             ],
         );
@@ -416,21 +123,24 @@ mod refund_tests {
                     contributor,
                     AccountSharedData::new(1_000_000_000, 0, &Pubkey::default()),
                 ),
-                (contributor_ta, contributor_ta_account),
-                (contributor_account, 
-                    AccountSharedData::new(
-                        mollusk
-                            .sysvars
-                            .rent
-                            .minimum_balance(Contributor::LEN),
-                        Contributor::LEN,
-                        &program_id,
-                    ),
+                (
+                    contributor_ta,
+                    get_ta(&mollusk, mint, contributor, u64::MAX, token_program),
+                ), // not used
+                (contributor_account, get_contributor(&mollusk, 0u64)), // not used
+                (
+                    fundraiser,
+                    get_fundraiser(&mollusk, maker, mint, u64::MIN, u64::MIN, bump),
+                ), // slot min -> campaign ended and reached goal -> not refund
+                (
+                    vault,
+                    get_ta(&mollusk, mint, authority, 2_000u64, token_program),
+                ), // not used                                                           // not used
+                (
+                    authority,
+                    AccountSharedData::new(1_000_000_000, 0, &Pubkey::default()),
                 ),
-                (fundraiser, fundraiser_account),
-                (vault, vault_account),
                 (token_program, token_program_account),
-                
             ],
         );
 
@@ -439,16 +149,9 @@ mod refund_tests {
 
     #[test]
     fn refund() {
-        let program_id = Pubkey::new_from_array(five8_const::decode_32_const(
-            "22222222222222222222222222222222222222222222",
-        ));
-
-        let mut mollusk = Mollusk::new(&program_id, "../target/deploy/fundraiser");
-
+        let mut mollusk = Mollusk::new(&PROGRAM_ID, "../target/deploy/fundraiser");
         mollusk_token::token::add_program(&mut mollusk);
-
         mollusk.sysvars.warp_to_slot(2); // We start in slot 2 so we can test expired (0)
-
         let (token_program, token_program_account) = mollusk_token::token::keyed_account();
 
         let maker = Pubkey::new_unique();
@@ -457,128 +160,24 @@ mod refund_tests {
         let contributor_account = Pubkey::new_unique();
         let fundraiser = Pubkey::new_unique();
         let mint = Pubkey::new_unique();
-        let (vault, bump) = Pubkey::find_program_address(&[&fundraiser.to_bytes()], &program_id);
-
-        // Vault starts with 2000
-        let mut vault_account = AccountSharedData::new(
-            mollusk
-                .sysvars
-                .rent
-                .minimum_balance(spl_token::state::Account::LEN),
-            spl_token::state::Account::LEN,
-            &spl_token::ID,
-        );
-        solana_sdk::program_pack::Pack::pack(
-            spl_token::state::Account {
-                mint,
-                owner: vault,
-                amount: 2_000,
-                delegate: COption::None,
-                state: spl_token::state::AccountState::Initialized,
-                is_native: COption::None,
-                delegated_amount: 0,
-                close_authority: COption::None,
-            },
-            vault_account.data_as_mut_slice(),
-        ).unwrap();
-
-        // fundraiser has ended and it was not successful so the contributor can get refunded
-        let mut fundraiser_account = AccountSharedData::new(
-            mollusk
-                .sysvars
-                .rent
-                .minimum_balance(mem::size_of::<Fundraiser>()),
-            mem::size_of::<Fundraiser>(),
-            &program_id,
-        );
-        fundraiser_account.set_data_from_slice(
-            &[
-                maker.to_bytes().to_vec(),
-                mint.to_bytes().to_vec(),
-                1u64.to_le_bytes().to_vec(), // still has remaining amount
-                u64::MIN.to_le_bytes().to_vec(), // Maximum slot so for sure it should fail
-                1u8.to_le_bytes().to_vec(),
-            ]
-            .concat(),
-        );
-
-        // We create a mint token account and define the token data
-        let mut mint_account = AccountSharedData::new(
-            mollusk
-                .sysvars
-                .rent
-                .minimum_balance(spl_token::state::Mint::LEN),
-            spl_token::state::Mint::LEN,
-            &token_program,
-        );
-        solana_sdk::program_pack::Pack::pack(
-            spl_token::state::Mint {
-                mint_authority: COption::None,
-                supply: 100_000_000_000,
-                decimals: 6,
-                is_initialized: true,
-                freeze_authority: COption::None,
-            },
-            mint_account.data_as_mut_slice(),
-        )
-        .unwrap();
-
-        // We create a contributor token account with 0 tokens contribution
-        let mut contributor_ta_account = AccountSharedData::new(
-            mollusk
-                .sysvars
-                .rent
-                .minimum_balance(spl_token::state::Account::LEN),
-            spl_token::state::Account::LEN,
-            &token_program,
-        );
-        solana_sdk::program_pack::Pack::pack(
-            spl_token::state::Account {
-                mint: mint,
-                owner: contributor,
-                amount: 0,
-                delegate: COption::None,
-                state: AccountState::Initialized,
-                is_native: COption::None,
-                delegated_amount: 0,
-                close_authority: COption::None,
-            },
-            contributor_ta_account.data_as_mut_slice(),
-        )
-        .unwrap();  
-
-        let mut contributor_account_account = AccountSharedData::new(
-            mollusk
-                .sysvars
-                .rent
-                .minimum_balance(Contributor::LEN),
-            Contributor::LEN,
-            &program_id,
-        );
-        contributor_account_account.set_data_from_slice(
-            &[
-                1_000u64.to_le_bytes().to_vec(),
-            ]
-            .concat(),
-        );
+        let vault = Pubkey::new_unique();
+        let (authority, bump) =
+            Pubkey::find_program_address(&[&fundraiser.to_bytes()], &PROGRAM_ID);
 
         // Data
-        let data = [
-            vec![3],
-            vec![bump],
-        ]
-        .concat();
- 
+        let data = [vec![3]].concat();
+
         // Instruction
         let instruction = Instruction::new_with_bytes(
-            program_id,
+            PROGRAM_ID,
             &data,
             vec![
                 AccountMeta::new(contributor, true),
                 AccountMeta::new(contributor_ta, false),
-                AccountMeta::new(contributor_account, true),
+                AccountMeta::new(contributor_account, false),
                 AccountMeta::new(fundraiser, false),
                 AccountMeta::new(vault, false),
+                AccountMeta::new(authority, false),
                 AccountMeta::new(token_program, false),
             ],
         );
@@ -590,30 +189,42 @@ mod refund_tests {
                     contributor,
                     AccountSharedData::new(1_000_000_000, 0, &Pubkey::default()),
                 ),
-                (contributor_ta, contributor_ta_account),
-                (contributor_account, contributor_account_account),
-                (fundraiser, fundraiser_account),
-                (vault, vault_account),
+                (
+                    contributor_ta,
+                    get_ta(&mollusk, mint, contributor, u64::MIN, token_program),
+                ), // Start with no tokens
+                (contributor_account, get_contributor(&mollusk, 1_000u64)), // we will refund 1_000u64
+                (
+                    fundraiser,
+                    get_fundraiser(&mollusk, maker, mint, 1_000u64, u64::MIN, bump),
+                ), // campaign ended but not reached (remaining > 0) -> refund OK
+                (
+                    vault,
+                    get_ta(&mollusk, mint, authority, 2_000u64, token_program),
+                ), // the vault will start with 2000
+                (
+                    authority,
+                    AccountSharedData::new(1_000_000_000, 0, &Pubkey::default()),
+                ),
                 (token_program, token_program_account),
-                
             ],
         );
 
         assert!(!result.program_result.is_err()); // It should not fail
 
-        let contributor_account = result
-            .get_account(&contributor_account)
-            .expect("Faiiled to get fundrasier account");
+        /* let contributor_account = result
+        .get_account(&contributor_account)
+        .expect("Faiiled to get fundrasier account"); */
 
         // Check the tokens happened
         let updated_contributor_ta_account = result
             .get_account(&contributor_ta)
             .expect("Failed to find contributor token account");
-        
+
         // Unpack the updated `contributor_ta` account data to read the token balance
-        let updated_contributor_ta_data: spl_token::state::Account = solana_sdk::program_pack::Pack::unpack(
-            &updated_contributor_ta_account.data(),
-        ).expect("Failed to unpack contributor token account");
+        let updated_contributor_ta_data: spl_token::state::Account =
+            solana_sdk::program_pack::Pack::unpack(&updated_contributor_ta_account.data())
+                .expect("Failed to unpack contributor token account");
 
         // Check the balance of `contributor_ta` after contribution
         let expected_balance = 1_000; // Assuming the contributor transferred all tokens to the fundraiser
@@ -623,12 +234,105 @@ mod refund_tests {
         let updated_vault_account = result
             .get_account(&vault)
             .expect("Failed to find vault account");
-        let updated_vault_data: spl_token::state::Account = solana_sdk::program_pack::Pack::unpack(
-            &updated_vault_account.data(),
-        ).expect("Failed to unpack contributor token account");
+        let updated_vault_data: spl_token::state::Account =
+            solana_sdk::program_pack::Pack::unpack(&updated_vault_account.data())
+                .expect("Failed to unpack contributor token account");
         let expected_balance = 1_000; // Assuming the contributor added 1000 and there was 2000, there should be 1000 left
-        
+
         assert_eq!(updated_vault_data.amount, expected_balance);
     }
 
+    fn get_fundraiser(
+        mollusk: &Mollusk,
+        maker: Pubkey,
+        mint: Pubkey,
+        goal: u64,
+        end_slot: u64,
+        bump: u8,
+    ) -> AccountSharedData {
+        let mut fundraiser_account = AccountSharedData::new(
+            mollusk
+                .sysvars
+                .rent
+                .minimum_balance(mem::size_of::<Fundraiser>()),
+            mem::size_of::<Fundraiser>(),
+            &self::PROGRAM_ID,
+        );
+        fundraiser_account.set_data_from_slice(
+            &[
+                maker.to_bytes().to_vec(),
+                mint.to_bytes().to_vec(),
+                goal.to_le_bytes().to_vec(),
+                end_slot.to_le_bytes().to_vec(), // Maximum slot so for sure it should fail
+                bump.to_le_bytes().to_vec(),
+            ]
+            .concat(),
+        );
+
+        fundraiser_account
+    }
+
+    fn get_ta(
+        mollusk: &Mollusk,
+        mint: Pubkey,
+        owner: Pubkey,
+        amount: u64,
+        token_program: Pubkey,
+    ) -> AccountSharedData {
+        let mut ta_account = AccountSharedData::new(
+            mollusk
+                .sysvars
+                .rent
+                .minimum_balance(spl_token::state::Account::LEN),
+            spl_token::state::Account::LEN,
+            &token_program,
+        );
+        solana_sdk::program_pack::Pack::pack(
+            spl_token::state::Account {
+                mint,
+                owner,
+                amount,
+                delegate: COption::None,
+                state: AccountState::Initialized,
+                is_native: COption::None,
+                delegated_amount: 0,
+                close_authority: COption::None,
+            },
+            ta_account.data_as_mut_slice(),
+        )
+        .unwrap();
+
+        ta_account
+    }
+
+    fn get_contributor(mollusk: &Mollusk, amount: u64) -> AccountSharedData {
+        let mut contributor_account = AccountSharedData::new(
+            mollusk.sysvars.rent.minimum_balance(Contributor::LEN),
+            Contributor::LEN,
+            &PROGRAM_ID,
+        );
+        contributor_account.set_data_from_slice(&[amount.to_le_bytes().to_vec()].concat());
+
+        contributor_account
+    }
 }
+
+/*
+fn get_instruction(
+    accounts
+    signer: Pubkey,
+    contributor: Pubkey,
+    contributor_ta: Pubkey,
+    contributor_account: Pubkey,
+    fundraiser: Pubkey,
+    mint: Pubkey,
+    vault: Pubkey,
+    num_instruction: u8
+) -> Instruction {
+    let data = [vec![num_instruction]].concat();
+
+    Instruction::new_with_bytes(
+        PROGRAM_ID,
+        &data,
+        vec![
+            AccountMeta::new(contributor, true), */
