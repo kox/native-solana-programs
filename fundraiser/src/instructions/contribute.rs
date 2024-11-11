@@ -1,7 +1,7 @@
 use pinocchio::{account_info::AccountInfo, program_error::ProgramError, sysvars::{clock::Clock, Sysvar}, ProgramResult};
 use pinocchio_token::instructions::Transfer;
 
-use crate::{ Contributor, Fundraiser, ID, MIN_AMOUNT_TO_RAISE, PDA_MARKER };
+use crate::{ Contributor, Fundraiser, MIN_AMOUNT_TO_RAISE };
 
 /// Checker
 /// Instruction signed by contributors to give their contribution in a fundraising event transfering tokens into the vault and
@@ -46,6 +46,7 @@ pub fn contribute(
 
     // Get fundraiser account data. Internally we check the ownership and LEN to avoid possible attacks
     let fundraiser_account = Fundraiser::from_account_info(fundraiser);
+    let contributor_account_account= Contributor::from_account_info(contributor_account);
 
     // Is expired the campaign? We will need to do a syscall to retrieve the slot 
     let clock = Clock::get().expect("Failed to load the clock");
@@ -61,18 +62,7 @@ pub fn contribute(
     // vault, and then claim some non owned tokens. To validate the vault, we will try to generate the PDA in a cheap way, modifying the 
     // fundraiser key with a bump passed via parameter.
     
-    // Let's generate the vault with the fundraiser and the bump (data)
-    /* let vault_pda = hashv(&[
-        fundraiser.key().as_ref(),
-        fundraiser_account.bump().to_le_bytes().as_ref(),
-        ID.as_ref(),
-        PDA_MARKER,
-    ]);
-
-    // Let's validate is the correct vault
-    assert_eq!(&vault_pda, vault.key().as_ref()); */
-
-    // TODO: do we need the bump in the fundraiser? as we pass it via param, probably we can delete it.
+    // TODO: Verify the vault is valid
 
     // We need to transfer the tokens + Update the remaining amount from fundraiser + update the contributor_account for a possible refund
 
@@ -84,10 +74,14 @@ pub fn contribute(
         amount,
     }.invoke()?;
 
+    // I guess i should check_add  but if overflow then it will fail anyways :') 
+    let contribute_amount = contributor_account_account.amount() + amount;
+    let remaining_amount = if amount > fundraiser_account.remaining_amount() { 0 } else { fundraiser_account.remaining_amount() - amount };
+
     unsafe {
         // Get a mutable pointer to the account's data once
         // Calculate the new amount and store it in the correct position (32-byte offset)
-        *(fundraiser.borrow_mut_data_unchecked().as_mut_ptr().add(64) as *mut [u8; 8]) = (fundraiser_account.remaining_amount() - amount).to_le_bytes();
+        *(fundraiser.borrow_mut_data_unchecked().as_mut_ptr().add(64) as *mut [u8; 8]) = (remaining_amount).to_le_bytes();
 
         // iusing copy_from_slice adds 2 CU
         // fundraiser.borrow_mut_data_unchecked()[64..72].copy_from_slice(&(fundraiser_account.remaining_amount() - amount).to_le_bytes());
@@ -95,8 +89,8 @@ pub fn contribute(
         // using check_sub adds 8 CU
         // *(fundraiser.borrow_mut_data_unchecked().as_mut_ptr().add(64) as *mut [u8; 8]) = (fundraiser_account.remaining_amount().checked_sub(amount).ok_or(ProgramError::ArithmeticOverflow))?.to_le_bytes();
 
-        // we update the contributor account data
-        *(contributor_account.borrow_mut_data_unchecked().as_mut_ptr() as *mut [u8; 8]) = amount.to_le_bytes();
+        // last but not least, we update the total contributions made by a user  
+        *(contributor_account.borrow_mut_data_unchecked().as_mut_ptr() as *mut [u8; 8]) = contribute_amount.to_le_bytes();
     }
 
     Ok(())
