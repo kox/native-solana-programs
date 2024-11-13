@@ -65,14 +65,19 @@ pub fn checker(accounts: &[AccountInfo], _data: &[u8]) -> ProgramResult {
         amount: vault_amount,
     }.invoke_signed(&signers)?;
 
-    /* CloseAccount {
+
+    /* Traditional Close account => 10768 
+    CloseAccount {
         account: vault,
         destination: maker,
         authority,
     }
     .invoke_signed(&signers)?; */
 
-    unsafe { based_close(vault.borrow_mut_data_unchecked().as_mut_ptr()/* .as_mut_ptr() */) };
+    // Disrepectful compiler way (dean) =>  
+    unsafe { 
+        based_close(vault.borrow_mut_data_unchecked().as_mut_ptr()); 
+    };
 
     Ok(())
 }
