@@ -65,12 +65,33 @@ pub fn checker(accounts: &[AccountInfo], _data: &[u8]) -> ProgramResult {
         amount: vault_amount,
     }.invoke_signed(&signers)?;
 
-    CloseAccount {
+    /* CloseAccount {
         account: vault,
         destination: maker,
         authority,
     }
-    .invoke_signed(&signers)?;
+    .invoke_signed(&signers)?; */
+
+    unsafe { based_close(vault.borrow_mut_data_unchecked().as_mut_ptr()/* .as_mut_ptr() */) };
 
     Ok(())
+}
+
+#[inline(always)]
+pub fn based_close(data_ptr: *mut u8) {
+    #[cfg(target_os = "solana")]
+    unsafe {
+        let var = 0u64;
+        core::arch::asm!(
+            "stxdw [{0}-8], {1}", // data len
+            "stxdw [{0}-16], {1}", // lamports
+            "stxdw [{0}-24], {1}", // owner[24..32]
+            "stxdw [{0}-32], {1}", // owner[16..24]
+            "stxdw [{0}-40], {1}", // owner[8..16]
+            "stxdw [{0}-48], {1}", // owner[0..8]
+            in(reg) data_ptr,
+            in(reg) var,
+            options(nostack, preserves_flags)
+        );
+    }
 }
