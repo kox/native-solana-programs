@@ -5842,6 +5842,22 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6a02e4885ed3bc0f2de90ea6dd45ebcbb66dacffe03547fadbb0eeae2770887d"
 
 [[package]]
+name = "voting_optimized"
+version = "0.1.0"
+dependencies = [
+ "bytemuck",
+ "five8_const",
+ "mollusk-svm",
+ "mollusk-token",
+ "pinocchio",
+ "pinocchio-system",
+ "pinocchio-token",
+ "solana-nostd-sha256",
+ "solana-sdk",
+ "spl-token",
+]
+
+[[package]]
 name = "walkdir"
 version = "2.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"

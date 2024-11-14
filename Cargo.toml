@@ -8,7 +8,7 @@ members = [ "amm",
     # "escrow-optimized",
     "hello_basic", 
     "vault_native", 
-    "vault_optimized",
+    "vault_optimized", "voting_optimized",
 #    "vault_based", not working on my arch
 ]
 

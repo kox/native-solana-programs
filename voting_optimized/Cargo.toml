@@ -1,0 +1,34 @@
+[package]
+name = "voting_optimized"
+version = "0.1.0"
+edition = "2021"
+authors.workspace = true
+homepage.workspace = true
+repository.workspace = true
+license.workspace = true
+
+[package.metadata.solana]
+program-id = "22222222222222222222222222222222222222222222"
+program-dependencies = []
+account-dependencies = []
+
+[lib]
+crate-type = ["cdylib", "lib"]
+
+[dependencies]
+pinocchio = { workspace = true }
+pinocchio-system = { workspace = true}
+pinocchio-token = { workspace = true}
+bytemuck = { workspace = true }
+five8_const = { workspace = true }
+solana-nostd-sha256 = { workspace = true }
+
+[dev-dependencies]
+mollusk-svm = { workspace = true }
+mollusk-token = { workspace = true }
+solana-sdk = { workspace = true }
+spl-token = { workspace = true }
+
+[features]
+test-sbf = []
+
