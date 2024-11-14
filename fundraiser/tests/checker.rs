@@ -270,6 +270,29 @@ mod checker_tests {
         );
 
         assert!(!result.program_result.is_err());
+
+        // Let's verify the vault maker will receive the tokens
+        // The vault will be emptied and closed
+        // Check the tokens happened
+        let updated_maker_ta_account = result
+            .get_account(&maker_ta)
+            .expect("Failed to find maker token account");
+
+        // Unpack the updated `contributor_ta` account data to read the token balance
+        let updated_maker_ta_data: spl_token::state::Account =
+            solana_sdk::program_pack::Pack::unpack(&updated_maker_ta_account.data())
+                .expect("Failed to unpack maker token account");
+
+        // Check the balance of `maker_ta` after maker
+        let expected_balance = 2_000; // Assuming the contributor transferred all tokens to the fundraiser
+        assert_eq!(updated_maker_ta_data.amount, expected_balance);
+
+        // Vault should be 0 and no data or lamports
+        let updated_vault_account = result
+            .get_account(&vault)
+            .expect("Failed to find vault account");
+
+        assert_eq!(updated_vault_account.lamports(), 0u64);
     }
 
 

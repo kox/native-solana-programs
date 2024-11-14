@@ -65,6 +65,8 @@ pub fn checker(accounts: &[AccountInfo], _data: &[u8]) -> ProgramResult {
         amount: vault_amount,
     }.invoke_signed(&signers)?;
 
+
+    // Traditional Close account => 10768 
     CloseAccount {
         account: vault,
         destination: maker,
@@ -74,3 +76,4 @@ pub fn checker(accounts: &[AccountInfo], _data: &[u8]) -> ProgramResult {
 
     Ok(())
 }
+
