@@ -69,13 +69,36 @@ pub fn refund(accounts: &[AccountInfo], _data: &[u8]) -> ProgramResult {
         *contributor.borrow_mut_lamports_unchecked() += *contributor_account.borrow_lamports_unchecked();
         *contributor_account.borrow_mut_lamports_unchecked() = 0;
 
-        contributor_account.assign(&Pubkey::default());
+        // Disrepectful compiler way (dean) =>  6506 (123 CU less with ASM)
+        based_close(contributor_account.borrow_mut_data_unchecked().as_mut_ptr());
 
+        // Old school for deleting account => 6629 CU
+        /* contributor_account.assign(&Pubkey::default());
         *(contributor_account.borrow_mut_data_unchecked().as_mut_ptr().sub(8) as *mut u64) = 0;
-
+ */
         // at least 50 more CUs
         // contributor_account.realloc(0, false);
     }
 
     Ok(())
+}
+
+
+#[inline(always)]
+pub fn based_close(data_ptr: *mut u8) {
+    #[cfg(target_os = "solana")]
+    unsafe {
+        let var = 0u64;
+        core::arch::asm!(
+            "stxdw [{0}-8], {1}", // data len
+            "stxdw [{0}-16], {1}", // lamports
+            "stxdw [{0}-24], {1}", // owner[24..32]
+            "stxdw [{0}-32], {1}", // owner[16..24]
+            "stxdw [{0}-40], {1}", // owner[8..16]
+            "stxdw [{0}-48], {1}", // owner[0..8]
+            in(reg) data_ptr,
+            in(reg) var,
+            options(nostack, preserves_flags)
+        );
+    }
 }
