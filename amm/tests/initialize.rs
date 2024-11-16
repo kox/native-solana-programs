@@ -1,13 +1,12 @@
 #[path = "./shared.rs"]
 mod shared;
 
-
 #[cfg(test)]
 mod initialize_tests {
     use crate::shared;
+    use amm::Config;
     
     use mollusk_svm::{result::Check, Mollusk};
-
     use solana_sdk::{
         account::{AccountSharedData, WritableAccount},
         instruction::{AccountMeta, Instruction},
@@ -17,7 +16,6 @@ mod initialize_tests {
     };
     use spl_token::state::AccountState;
 
-    use amm::Config;
 
     #[test]
     fn initialize() {

@@ -1,0 +1,257 @@
+# Account Checks
+
+Account checks are one of the most important important things we must consider to secure our Solana programs. If you have a background in Anchor, you may be familiar with the similar concept of [account constraints](https://www.anchor-lang.com/docs/account-constraints). Here is a list of common account checks you should consider performing, along with _how_ and _why_.
+
+#### Which checks should I perform?
+
+Here is a brief checklist you run through every time you write a Native Rust program:
+
+- [ ] Program ID Checks
+- [ ] Sysvar Checks
+- [ ] Owner Checks
+- [ ] Initialization Checks
+- [ ] Signer Checks
+- [ ] Mint Checks
+- [ ] PDA Checks
+- [ ] Close Account Checks
+
+There are many other things you will likely need to consider to fully secure your program, but these are the most common footguns you will come up against. Having a checklist is a great way to make sure you have taken all of these things into account. Upon completing this checkilst, we can then look to optimize for CUs by omitting some of the more superfluous checks.
+
+### Program ID Checks
+
+When invoking others programs in your program, such as the `TokenProgram`, you must ensure that the account passed in for each program has the desired address. Failing to do so enables attackers to inject a program of another address with a conforming API that could be used to steal your funds, or break other constraints that depend upon the correct address of this program such as the `AssociatedTokenProgram`.
+
+#### Anchor Example
+
+In Anchor, we solve for these checks with [Program&lt;T&gt;](https://github.com/coral-xyz/anchor/blob/master/lang/src/accounts/program.rs#L30). Below is an example using it in conjunction with the `Token` program type:
+
+```rs
+#[derive(Accounts)]
+struct Transfer<'info> {
+    token_program: Program<'info, Token>
+}
+```
+
+In this example:
+
+- `Program<T>` ensures the account is executable, and
+- `Token` its address is equal to `TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA`
+
+#### Native Rust Example
+
+In Native Rust, we would typically handle those checks in the body of our instruction like this:
+
+```rs
+assert!(&token_program.executable);
+assert_eq!(&spl_token::ID, &token_program.key);
+```
+
+#### Optimizations
+
+When the desired Program ID is known, it is generally possible to omit the executable check, as having the correct Program ID already enables us to know that it is executable. There are also runtime errors that will occur when attempting to execute instructions against a non-executable account.
+
+### Sysvar Checks
+
+When using Sysvar accounts, we need to check that they:
+
+1. Are owned by the Sysvar program, and/or
+2. Have the correct address
+
+Failing to perform these checks enables an attacker to inject fake Sysvar accounts and potentially exploit your program.
+
+In Anchor, we solve for these checks with `Sysvar<T>`. Below is an example using it in conjunction with the `Rent` sysvar account type:
+
+```rs
+#[derive(Accounts)]
+struct Initialize<'info> {
+    pub rent: Sysvar<'info, Rent>,
+}
+```
+
+In this example:
+
+- `Sysvar<T>` ensures the account is owned by `Sysvar1111111111111111111111111111111111111`
+- `Rent` ensures its address is equal to `SysvarRent111111111111111111111111111111111 `
+
+In Native Rust, we would handle this like so:
+
+```rs
+assert_eq!(&sysvar::ID, &rent.owner);
+assert_eq!(&sysvar::rent::ID, &rent.key);
+```
+
+#### Optimizations
+
+In practice, the Sysvar program owner check can be omitted, as knowing the account has the correct address already enables us to infer that it belongs to the Sysvar program.
+
+If security is your main concern, it is often best to access Sysvar data directly from the sysvar syscalls instead of passing in an account, like so:
+
+```rs
+let clock = Clock::get()?;
+```
+
+Relying upon the syscall enables us to be sure that we have closed off all possible account-based attack vectors for our sysvar variables.
+
+**Extreme Optimizations**
+
+Relying on syscalls allow us to send less data to the chain, as we just have to reference the syscall in our program, instead of passing in the account. Contrarily, when prioritizing for peak performance, if you are not bound by instruction data, it can actually be more efficient to pass in Sysvar accounts than to invoke the Sysvar syscalls. This is because the base cost of invoking Sysvar syscalls is `100 CUs`, however when paired with an efficient entrypoint like [nostd-entrypoint](https://github.com/cavemanloverboy/solana-nostd-entrypoint) or [pinocchio](https://github.com/febo/pinocchio), passing in the account can actually achieve the same result for roughly `10CUs`.
+
+The decision of what to optimize and when depends on the purpose of your program, and should be carefully considered at each decision step.
+
+### Owner Checks
+
+When reading from/writing to existing accounts, it is important to check that the account
+
+1. `owner` matches the correct Program ID, and
+2. is of the correct type - typically handled by checking `data` length, or using an account discriminator
+
+By knowing that the account is created by the correct program, and that the data length or discriminator is as expected, we can know that the account is genuine. Failure to perform this check may enable an attacked to inject malicious accounts that cause undefined behavior, possibly causing loss of funds.
+
+#### Anchor Example
+
+In Anchor, we solve for these checks with [Account&lt;T&gt;](https://github.com/coral-xyz/anchor/blob/master/lang/src/accounts/program.rs#L30). It takes in a generic type that implements the `Owner` trait which is typically automatically set to checked for `crate::ID` by the `#[account]` macro. This means Account will be automatically checking for the Program ID of your own program as declared in `lib.rs`, or alternatively the Program ID of any program you are importing via `Cargo.toml`.
+
+```rs
+#[derive(Accounts)]
+struct Transfer<'info> {
+    escrow: Account<'info, Escrow>
+}
+```
+
+In this example:
+
+- `Account<T>` ensures type `T` implements has the correct `owner` and `discriminator`, then deserializes the account data
+- `Token` implements the `Owner` and `AccountDeserialize` traits, enabling the `Account<T>` checks to work
+
+#### Native Rust Example
+
+In Native Rust, we might handle these checks in the body of our instruction like so:
+
+```rs
+// Create an account discriminator for Escrow type
+const ESCROW_DISCRIMINATOR: u8 = 1;
+
+// Split the discriminator out from account data
+let (discriminator, data) = escrow.data.borrow()
+	.split_first()
+	.ok_or(ProgramError::InvalidInstructionData)?;
+
+// Check the discriminator
+assert_eq!(&ESCROW_DISCRIMINATOR, discriminator);
+
+// Ensure the Escrow account is owned by the current program
+assert_eq!(&crate::ID, &escrow.owner);
+
+// Deserialize data into Escrow struct
+let escrow_data = Escrow::try_unpack(data)?;
+```
+
+#### Optimizations
+
+It is possible to skip owner checks for accounts owned by your own program when you are either:
+
+1. mutating the `lamports` balance of the account without CPI
+2. mutating the `data` of the account in your program
+
+This is because attempting to modify memory that your program doesn't own will case the Solana runtime will throw a `InstructionError::PrivilegeEscalation` error, causing your transaction to fail. By virtue of this, if we are careful with our assumptions, it is possible to skip these checks to save on compute units.
+
+### Initialization Checks
+
+When initializing new accounts, we need to make sure that the account is not already initialized.
+
+Naively, we may initially think that checking the lamports balance of the account is non-zero would be sufficient, however as Solana allows us to send lamports to any account we want, this is unreliable, as an attacker could sabotage your program by figuring out your PDA seeds and sending lamports to uninitialized accounts.
+
+Instead, we actually need to check the `owner` of the account. This is because the only way for a program other than the `System Program` to take ownership of an account is through signing, proving that the account has been processed by your program logic.
+
+#### Anchor
+
+In Anchor, these checks would automatically be performed by simply adding the `init` constraint to the account struct, like so:
+
+```rs
+#[derive(Accounts)]
+struct Transfer<'info> {
+	#[account(
+		init,
+		payer = signer,
+		space = Escrow::INIT_SPACE
+	)]
+    escrow: Account<'info, Escrow>
+}
+```
+
+Under the hood, this is checking that the account:
+
+1. `owner` is the `System Program`
+2. `data` is uninitialized
+
+It will then proceed to CPI into the `SystemProgram` to initialize the account.
+
+#### Native Rust
+
+In Native Rust, we would do it like:
+
+```rs
+assert!(escrow.is_writable && escrow.data_is_empty() && escrow.owner != &crate::ID);
+```
+
+# Optimizations
+
+If the account is not mutable, the system program will not allow you to write to it, and by knowing that the account does not belong to your program, we can know that either it's data is uninitialized, or it belongs to another program and thus we are unable to write to it. Therefore, in practice it is enough to simply know that the account does not belong to your program:
+
+```rs
+assert!(escrow.owner != &crate::ID);
+```
+
+#### 
+
+### Signer Checks
+
+When dealing with the concept of permissions in our programs, we typically rely upon cryptogrpahic proofs of identity. While Soalana supports several cryptographic signature schemes, such as ECDSA, Schnorr or RSA, the most common way of handling this is to simply use the signer constraint on an account.
+
+If we fail to do Signer checks, it may allow attackers to achieve unauthorized access to sensitive accounts such as vaults or escrows controlled by our program.
+
+#### Anchor Example
+
+In Anchor, we use [Signer](https://github.com/coral-xyz/anchor/blob/master/lang/src/accounts/program.rs#L30) to do these checks.
+
+```rs
+#[derive(Accounts)]
+struct Transfer<'info> {
+    signer: Signer<'info>
+}
+```
+
+In this example:
+
+- `Signer<'a>` ensures that `Signer` has signed the transaction, and is owned by the `SystemProgram`
+
+#### Native Rust Example
+
+In Native Rust, we might handle these checks like so:
+
+```rs
+assert!(system_program::check_id(system_program.key));
+assert!(signer.is_signer && signer.owner == system_program.key);
+```
+
+# Mint Checks
+
+Make sure your token accounts have the correct mint address. Failure to constraint your mints could result in loss of funds through a malicious mint account injection.
+
+# PDA Checks
+
+- Pick good seeds
+- Make sure your seeds match
+
+#### Optimizations
+
+- Save your bumps for use with PDA signing and/or `sol_create_program_address` instead of `sol_try_find_program_address` where possible
+- Consider using `sol_sha256` instead of `sol_create_program_address` in situations where it not necessary to check if the address is off-curve
+
+# Close Account Checks
+
+- Remove all lamports
+- Reassign data length to zero
+- Set owner to System Program
+
+Failure to do so may result in an account reanimation attack.

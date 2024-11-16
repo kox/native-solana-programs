@@ -74,7 +74,7 @@ pub fn deposit(accounts: &[AccountInfo], data: &[u8]) -> ProgramResult {
         amount: x,
     }
     .invoke()?;
-
+ 
     Transfer {
         from: user_y,
         to: vault_y,

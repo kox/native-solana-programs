@@ -330,7 +330,7 @@ mod tests {
 
         let mut config_account = AccountSharedData::new(
             mollusk.sysvars.rent.minimum_balance(Config::LEN),
-            Config::LEN,
+            Config::LEN,    
             &program_id,
         );
 
