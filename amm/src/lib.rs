@@ -1,3 +1,8 @@
+use pinocchio::account_info::AccountInfo;
+use pinocchio::entrypoint;
+use pinocchio::pubkey::Pubkey;
+use pinocchio::{program_error::ProgramError, ProgramResult};
+
 mod instructions;
 use instructions::AmmInstruction;
 use instructions::{
@@ -6,11 +11,6 @@ use instructions::{
 
 mod state;
 pub use state::*;
-
-use pinocchio::account_info::AccountInfo;
-use pinocchio::entrypoint;
-use pinocchio::pubkey::Pubkey;
-use pinocchio::{program_error::ProgramError, ProgramResult};
 
 entrypoint!(process_instruction);
 
@@ -29,10 +29,10 @@ fn process_instruction(
         .ok_or(ProgramError::InvalidInstructionData)?;
 
     match AmmInstruction::try_from(discriminator)? {
-        AmmInstruction::Initialize => initialize(accounts, data),
-        AmmInstruction::Deposit => deposit(accounts, data),
-        AmmInstruction::Withdraw => withdraw(accounts, data),
-        AmmInstruction::Swap => swap(accounts, data),
-        AmmInstruction::Lock => lock(accounts),
+        AmmInstruction::Initialize =>   initialize(accounts, data),
+        AmmInstruction::Deposit =>      deposit(accounts, data),
+        AmmInstruction::Withdraw =>     withdraw(accounts, data),
+        AmmInstruction::Swap =>         swap(accounts, data),
+        AmmInstruction::Lock =>         lock(accounts),
     }
 }

@@ -1,6 +1,11 @@
+#[path = "./shared.rs"]
+mod shared;
+
+
 #[cfg(test)]
-/* mod tests { */
-use crate::tests::setup;
+mod initialize_tests {
+    use crate::shared;
+    
     use mollusk_svm::{result::Check, Mollusk};
 
     use solana_sdk::{
@@ -16,28 +21,21 @@ use crate::tests::setup;
 
     #[test]
     fn initialize() {
+        let (mollusk, program_id) = shared::setup();
 
-        let (mollusk, program_id) = setup();
-
-        /* let program_id = Pubkey::new_from_array(five8_const::decode_32_const(
-            "22222222222222222222222222222222222222222222",
-        ));
-
-        let mollusk = Mollusk::new(&program_id, "../target/deploy/amm");
- */
         let config = Pubkey::new_unique();
 
         let data = [
-            vec![0],
-            vec![0],
-            Pubkey::default().to_bytes().to_vec(),
-            Pubkey::default().to_bytes().to_vec(),
-            Pubkey::default().to_bytes().to_vec(),
-            Pubkey::default().to_bytes().to_vec(),
-            Pubkey::default().to_bytes().to_vec(),
-            Pubkey::default().to_bytes().to_vec(),            
-            u16::MAX.to_le_bytes().to_vec(),
-            u8::MAX.to_le_bytes().to_vec(),
+            vec![0],                                // Instruction
+            vec![0],                                // status
+            Pubkey::default().to_bytes().to_vec(),  // authority
+            Pubkey::default().to_bytes().to_vec(),  // mint x
+            Pubkey::default().to_bytes().to_vec(),  // mint y
+            Pubkey::default().to_bytes().to_vec(),  // mint lp
+            Pubkey::default().to_bytes().to_vec(),  // vault x
+            Pubkey::default().to_bytes().to_vec(),  // vault y    
+            u16::MAX.to_le_bytes().to_vec(),        // fee
+            u8::MAX.to_le_bytes().to_vec(),         // authority bump
         ]
         .concat();
 
@@ -60,4 +58,4 @@ use crate::tests::setup;
             &[Check::success()]
         );
     }
-/* } */
+}

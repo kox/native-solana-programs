@@ -1,29 +1,13 @@
-use mollusk_svm::Mollusk;
-use solana_sdk::{
-    account::{AccountSharedData, WritableAccount},
-    program_option::COption,
-    program_pack::Pack,
-    pubkey::Pubkey,
-};
-use spl_token::state::AccountState;
 
-pub fn setup() -> (Mollusk, Pubkey) {
-    let program_id = Pubkey::new_from_array(five8_const::decode_32_const(
-        "22222222222222222222222222222222222222222222",
-    ));
+pub mod shared;  // Exposes the `setup` module
 
-    let project_name = format!("../target/deploy/{}", env!("CARGO_PKG_NAME"));
-    let mut mollusk = Mollusk::new(&program_id, &project_name);
+// Re-export the `setup` function for easy access in other tests
+pub use shared::setup;
 
-
-    // let mut mollusk = Mollusk::new(&program_id, "../target/deploy/");
-    mollusk_token::token::add_program(&mut mollusk);
-    (program_id, mollusk)
-}
-
+/* 
 #[cfg(test)]
 mod initialize;
-
+ */
 
 
 
