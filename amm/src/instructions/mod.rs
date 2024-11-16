@@ -1,18 +1,18 @@
 use pinocchio::program_error::ProgramError;
 
-pub mod initialize;
-pub mod swap;
 pub mod deposit;
+pub mod initialize;
+pub mod lock;
+pub mod swap;
 pub mod withdraw;
-/* pub mod checker;
-pub mod refund; */
 
 #[derive(Clone, Copy, Debug)]
 pub enum AmmInstruction {
-    Swap,
+    Initialize,
     Deposit,
     Withdraw,
-    Initialize,
+    Swap,
+    Lock,
 }
 
 impl TryFrom<&u8> for AmmInstruction {
@@ -20,11 +20,12 @@ impl TryFrom<&u8> for AmmInstruction {
 
     fn try_from(value: &u8) -> Result<Self, Self::Error> {
         match value {
-            0 => Ok(AmmInstruction::Initialize),
-            1 => Ok(AmmInstruction::Swap),
-            2 => Ok(AmmInstruction::Deposit),
-            3 => Ok(AmmInstruction::Withdraw),
-            _ => Err(ProgramError::InvalidInstructionData)
+            0 => Ok(Self::Initialize),
+            1 => Ok(Self::Deposit),
+            2 => Ok(Self::Withdraw),
+            3 => Ok(Self::Swap),
+            4 => Ok(Self::Lock),
+            _ => Err(ProgramError::InvalidInstructionData),
         }
     }
-    }
+}

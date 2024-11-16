@@ -104,13 +104,14 @@ dependencies = [
 name = "amm"
 version = "0.1.0"
 dependencies = [
- "bytemuck",
+ "constant-product-curve",
  "five8_const",
  "mollusk-svm",
  "mollusk-token",
  "pinocchio",
  "pinocchio-system",
  "pinocchio-token",
+ "solana-nostd-sha256",
  "solana-sdk",
  "spl-token",
 ]
@@ -847,6 +848,10 @@ dependencies = [
  "log",
  "web-sys",
 ]
+
+[[package]]
+name = "constant-product-curve"
+version = "0.1.0"
 
 [[package]]
 name = "constant_time_eq"
