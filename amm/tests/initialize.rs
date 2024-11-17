@@ -6,16 +6,11 @@ mod initialize_tests {
     use crate::shared;
     use amm::Config;
     
-    use mollusk_svm::{result::Check, Mollusk};
     use solana_sdk::{
-        account::{AccountSharedData, WritableAccount},
+        account::AccountSharedData,
         instruction::{AccountMeta, Instruction},
-        program_option::COption,
-        program_pack::Pack,
         pubkey::Pubkey,
     };
-    use spl_token::state::AccountState;
-
 
     #[test]
     fn initialize() {
@@ -48,12 +43,16 @@ mod initialize_tests {
 
         let lamports = mollusk.sysvars.rent.minimum_balance(Config::LEN);
 
-        mollusk.process_and_validate_instruction(
+        let result: mollusk_svm::result::InstructionResult = mollusk.process_instruction(
             &instruction,
             &vec![
                 (config, AccountSharedData::new(lamports, Config::LEN, &program_id)),
             ],
-            &[Check::success()]
         );
+
+        assert!(!result.program_result.is_err());
+
+        // We could add some tests to the config account created
     }
+
 }

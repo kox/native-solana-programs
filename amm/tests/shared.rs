@@ -2,9 +2,9 @@
 use std::mem;
 
 use amm::Config;
-use mollusk_svm::Mollusk;
+use mollusk_svm::{result::InstructionResult, Mollusk};
 use solana_sdk::{
-    account::{AccountSharedData, WritableAccount},
+    account::{AccountSharedData, WritableAccount, ReadableAccount},
     program_option::COption,
     program_pack::Pack,
     pubkey::Pubkey,
@@ -122,4 +122,18 @@ pub fn create_config(
     );
 
     account
+}
+
+
+#[inline]
+pub fn expect_token_balance(result: &InstructionResult, account: Pubkey, expected_balance: u64) {
+    let account_shared_data = result
+        .get_account(&account)
+        .expect("Failed to find contributor token account");
+
+    let account_data: spl_token::state::Account =
+        solana_sdk::program_pack::Pack::unpack(&account_shared_data.data())
+            .expect("Failed to unpack contributor token account");
+
+    assert_eq!(account_data.amount, expected_balance);
 }
