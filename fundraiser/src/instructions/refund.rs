@@ -1,4 +1,4 @@
-use pinocchio::{account_info::AccountInfo, instruction::{Seed, Signer}, program_error::ProgramError, pubkey::Pubkey, sysvars::{clock::Clock, Sysvar}, ProgramResult};
+use pinocchio::{account_info::AccountInfo, instruction::{Seed, Signer}, program_error::ProgramError, sysvars::{clock::Clock, Sysvar}, ProgramResult};
 use pinocchio_token::{instructions::Transfer, state::TokenAccount};
 
 use crate::{ Contributor, Fundraiser };

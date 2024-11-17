@@ -18,8 +18,8 @@ pub use state::Contributor;
 pub use constants::*;
 
 const ID: Pubkey = five8_const::decode_32_const("22222222222222222222222222222222222222222222");
-const PDA_MARKER: &[u8; 21] = b"ProgramDerivedAddress";
-
+/* const PDA_MARKER: &[u8; 21] = b"ProgramDerivedAddress";
+ */
 entrypoint!(process_instruction);
 
 pub fn process_instruction(

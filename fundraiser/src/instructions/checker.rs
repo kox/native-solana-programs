@@ -6,7 +6,7 @@ use pinocchio::{
     ProgramResult,
 };
 
-use crate::{ Fundraiser, Contributor };
+use crate::Fundraiser;
 use pinocchio_token::{
     instructions::{CloseAccount, Transfer},
     state::TokenAccount,

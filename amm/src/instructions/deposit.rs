@@ -1,109 +1,101 @@
-
-
-use std::sync::Arc;
-
-use mollusk_svm::result::ProgramResult;
-use pinocchio::{account_info::AccountInfo, program_error::ProgramError};
-use pinocchio_token::{instructions::MintTo, state::TokenAccount};
+use constant_product_curve::xy_deposit_amounts_from_l;
+use pinocchio::{
+    account_info::AccountInfo, instruction::{Seed, Signer}, program_error::ProgramError, sysvars::{clock::Clock, Sysvar}, ProgramResult
+};
+use pinocchio_token::{
+    instructions::{MintTo, Transfer},
+    state::{Mint, TokenAccount},
+};
 
 use crate::state::Config;
 
+/// # Deposit
+///
+/// -- Data scheme --
+/// Amount: u64
+/// MaxX: u64
+/// MaxY: u64
+/// Expiration: i64
+///
+/// -- Instruction Logic --
+///
+/// -- Client Side Logic --
+///
+/// -- Account Optimization Logic --
+///
+/// -- Checks --
+///
 pub fn deposit(accounts: &[AccountInfo], data: &[u8]) -> ProgramResult {
-    let [
-        provider,
-        config,
-        authority,
-        provider_x,
-        provider_y,
-        provider_lp,
-        vault_x,
-        vault_y,
-        mint_lp,
-    ] = accounts else {
+    let [user, authority, mint_lp, user_x, user_y, user_lp, vault_x, vault_y, config, _token_program] =
+        accounts
+    else {
         return Err(ProgramError::NotEnoughAccountKeys);
     };
 
-    let config_account = Config::from_account_info_unchecked(config);
-
-    assert_eq!(&config_account.vault_x(), vault_x.key());
-    assert_eq!(&config_account.vault_y(), vault_y.key());
-
-    // assert_eq!(&config_account.mint_lp(), mint_lp.key());
-
-    let (amount, max_x, max_y) = unsafe {
-        *(data.as_ptr() as *const (u64, u64, u64))
+    // Deserialize Data
+    let (amount, max_x, max_y, expiration) = unsafe {
+        let [amount, max_x, max_y, expiration] = *(data.as_ptr() as *const [u64; 4]);
+        (amount, max_x, max_y, expiration as i64)
     };
 
-    let (supply_lp, supply_x, supply_y) = unsafe { (
-            Mint::from_account_info_unchecked(mint_lp)?.supply(),
-            TokenAccount::from_account_info_unchecked(vault_x)?.amount(),
-            TokenAccount::from_account_info_unchecked(vault_y)?.amount(),
+    // Checks
+    let config_account = Config::from_account_info(config);
+    assert_ne!(config_account.get_status(), 1);
+    assert_eq!(mint_lp.key(), &config_account.mint_lp());
+    assert_eq!(vault_x.key(), &config_account.vault_x());
+    assert_eq!(vault_y.key(), &config_account.vault_y());
+    assert!(expiration < Clock::get()?.unix_timestamp);
+
+    // Calculate the amount of LP tokens to mint and the amount of tokens to deposit
+    let supply = unsafe { Mint::from_account_info_unchecked(mint_lp)?.supply() };
+    let vault_x_amount = unsafe { TokenAccount::from_account_info_unchecked(vault_x)?.amount() };
+    let vault_y_amount = unsafe { TokenAccount::from_account_info_unchecked(vault_y)?.amount() };
+
+    let (x, y) = match supply == 0 && vault_x_amount == 0 && vault_y_amount == 0 {
+        true => (max_x, max_y),
+        false => xy_deposit_amounts_from_l(
+            vault_x_amount,
+            vault_y_amount,
+            supply,
+            amount,
+            1_000_000_000,
         )
+        .map_err(|_| ProgramError::ArithmeticOverflow)?,
     };
 
-    let precision = 1_000_000u128;
-    let ratio = (u128::from(supply_lp)
-        .checked_add(u128::from(amount))
-        .ok_or(ProgramError::ArithmeticOverflow)?)
-        .checked_mul(precision).ok_or(ProgramError::ArithmeticOverflow)?;
+    assert!(x <= max_x);
+    assert!(y <= max_y);
 
-    let (deposit_x_amount, deposit_y_amount) = if supply_lp == 0 {
-
-    } else {
-        (
-        u64::from((u128::from(supply_x)
-            .checked_mul(ratio)
-            .ok_or(ProgramError::ArithmeticOverflow)?)
-            .checked_div(precision)
-            .ok_or(ProgramError::ArithmeticOverflow)?),
-    
-        u64::from((u128::from(supply_y)
-            .checked_mul(ratio)
-            .ok_or(ProgramError::ArithmeticOverflow)?)
-            .checked_div(precision)
-            .ok_or(ProgramError::ArithmeticOverflow)?)
-        )
-    };
-
-
-    assert!(deposit_x_amount.le(&max_x));
-    assert!(deposit_y_amount.le(&max_x));
-
+    // Deposit Tokens
     Transfer {
-        from: provider_x,
+        from: user_x,
         to: vault_x,
-        authority: provider,
-        amount: deposit_x_amount,
-    }.invoke()?;
-
+        authority: user,
+        amount: x,
+    }
+    .invoke()?;
+ 
     Transfer {
-        from: provider_y,
+        from: user_y,
         to: vault_y,
-        authority: provider,
-        amount: deposit_y_amount,
-    }.invoke()?;
+        authority: user,
+        amount: y,
+    }
+    .invoke()?;
 
-    let binding = config_account.bump();
-    let seeds = [
-        Seed::from(config.key().as_ref(),
-        Seed::from(&binding),
-    )];
+    // Derive the signer
+    let binding = [config_account.authority_bump()];
+    let seeds = [Seed::from(config.key().as_ref()), Seed::from(&binding)];
+    let signer = [Signer::from(&seeds)];
 
+    // Mint LP Tokens
     MintTo {
         mint: mint_lp,
-        token: provider_lp,
+        token: user_lp,
         mint_authority: authority,
         amount,
-    }.invoke_signed(signers);
+    }
+    .invoke_signed(&signer)?;
 
-    /* let multiplier = (supply_lp + amount) / supply_lp;
-    let deposit_x_amount  = multiplier * supply_x - supply_x;
-    let deposit_y_amount  = multiplier * supply_y - supply_y; */
-
-    /* Another way
-    supply_x * 10000 /supply_lp * amount / 1000;
-    supply_y * 10000 /supply_lp * amount / 1000; 
-    */
-     
-
+    Ok(())
 }

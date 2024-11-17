@@ -1,0 +1,10 @@
+[package]
+name = "constant-product-curve"
+version = "0.1.0"
+edition = "2021"
+authors = ["Dean Little <@deanmlittle>"]
+homepage.workspace = true
+repository.workspace = true
+license.workspace = true
+
+[dependencies]
