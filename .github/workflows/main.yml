@@ -46,6 +46,8 @@ jobs:
         with:
           version: ${{ env.SOLANA_VERSION }}
           cache: true
+      - name: Install Protoc
+        uses: arduino/setup-protoc@v3
       - name: Cache cargo dependencies
         uses: actions/cache@v4
         with:
@@ -62,6 +64,8 @@ jobs:
     steps:
       - name: Git checkout
         uses: actions/checkout@v4
+      - name: Install Protoc
+        uses: arduino/setup-protoc@v3
       - name: Cache cargo dependencies
         uses: actions/cache@v4
         with:
