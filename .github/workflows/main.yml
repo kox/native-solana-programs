@@ -29,6 +29,8 @@ jobs:
           toolchain: ${{ env.RUST_VERSION }}
       - name: Formatting
         run: cargo fmt --all --check
+      - name: Install Protoc
+        uses: arduino/setup-protoc@v3
       - name: Clippy
         run: cargo clippy --all-targets --all-features --no-deps
 
