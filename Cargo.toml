@@ -8,7 +8,7 @@ members = [
     # "experimental-loader", 
     "fundraiser", 
     # "escrow-optimized",
-    "hello_basic", 
+    "hello_basic", "marketplace-native", 
     "vault_native", 
     "vault_optimized", "voting_optimized",
 #    "vault_based", not working on my arch
