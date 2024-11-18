@@ -6,7 +6,7 @@ on:
   pull_request:
 
 env:
-  RUST_VERSION: 1.78.0
+  RUST_VERSION: nightly # 1.78.0
   SOLANA_VERSION: 1.18.20
   CARGO_CACHE: |
     ~/.cargo/bin/
