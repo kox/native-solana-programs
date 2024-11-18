@@ -79,7 +79,7 @@ mod checker_tests {
 
         assert!(result.program_result.is_err()); // It should fail
     }
- 
+
     #[test]
     fn should_fail_when_not_reach_goal() {
         let mut mollusk = Mollusk::new(&PROGRAM_ID, "../target/deploy/fundraiser");
@@ -130,7 +130,7 @@ mod checker_tests {
                 (
                     vault,
                     get_ta(&mollusk, mint, authority, 2_000u64, token_program),
-                ), // not used  
+                ), // not used
                 (
                     authority,
                     AccountSharedData::new(1_000_000_000, 0, &Pubkey::default()),
@@ -190,14 +190,11 @@ mod checker_tests {
                     maker_ta,
                     get_ta(&mollusk, mint, maker, u64::MIN, token_program),
                 ), // not used
-                (
-                    fundraiser,
-                    fundraiser_account,
-                ), // slot min -> ended and remaining == 0 -> success goal
+                (fundraiser, fundraiser_account), // slot min -> ended and remaining == 0 -> success goal
                 (
                     vault,
                     get_ta(&mollusk, mint, authority, 2_000u64, token_program),
-                ), // not used  
+                ), // not used
                 (
                     authority,
                     AccountSharedData::new(1_000_000_000, 0, &Pubkey::default()),
@@ -253,14 +250,11 @@ mod checker_tests {
                     maker_ta,
                     get_ta(&mollusk, mint, maker, u64::MIN, token_program),
                 ), // not used
-                (
-                    fundraiser,
-                    fundraiser_account,
-                ), // slot min -> ended and remaining == 0 -> success goal
+                (fundraiser, fundraiser_account), // slot min -> ended and remaining == 0 -> success goal
                 (
                     vault,
                     get_ta(&mollusk, mint, authority, 2_000u64, token_program),
-                ), // not used  
+                ), // not used
                 (
                     authority,
                     AccountSharedData::new(1_000_000_000, 0, &Pubkey::default()),
@@ -294,7 +288,6 @@ mod checker_tests {
 
         assert_eq!(updated_vault_account.lamports(), 0u64);
     }
-
 
     fn get_fundraiser(
         mollusk: &Mollusk,

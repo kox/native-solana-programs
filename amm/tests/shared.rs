@@ -1,10 +1,9 @@
-
 use std::mem;
 
 use amm::Config;
 use mollusk_svm::{result::InstructionResult, Mollusk};
 use solana_sdk::{
-    account::{AccountSharedData, WritableAccount, ReadableAccount},
+    account::{AccountSharedData, ReadableAccount, WritableAccount},
     program_option::COption,
     program_pack::Pack,
     pubkey::Pubkey,
@@ -24,12 +23,12 @@ pub fn setup() -> (Mollusk, Pubkey) {
 }
 
 pub fn create_mint_account(
-    mollusk: &Mollusk, 
-    authority: Pubkey, 
-    supply: u64, 
-    decimals: u8, 
-    is_initialized: bool,  
-    token_program: Pubkey
+    mollusk: &Mollusk,
+    authority: Pubkey,
+    supply: u64,
+    decimals: u8,
+    is_initialized: bool,
+    token_program: Pubkey,
 ) -> AccountSharedData {
     let mut account = AccountSharedData::new(
         mollusk
@@ -53,21 +52,21 @@ pub fn create_mint_account(
 }
 
 pub fn create_token_account(
-    mollusk: &Mollusk, 
-    mint: Pubkey, 
-    owner: Pubkey, 
-    amount: u64, 
-    token_program_id: Pubkey
+    mollusk: &Mollusk,
+    mint: Pubkey,
+    owner: Pubkey,
+    amount: u64,
+    token_program_id: Pubkey,
 ) -> AccountSharedData /* (PubKey, AccountSharedData) */ {
     let mut account = AccountSharedData::new(
         mollusk
             .sysvars
             .rent
             .minimum_balance(spl_token::state::Account::LEN),
-            spl_token::state::Account::LEN,
+        spl_token::state::Account::LEN,
         &token_program_id,
     );
- 
+
     spl_token::state::Account::pack(
         spl_token::state::Account {
             mint,
@@ -80,7 +79,8 @@ pub fn create_token_account(
             close_authority: COption::None,
         },
         account.data_as_mut_slice(),
-    ).unwrap();
+    )
+    .unwrap();
 
     account
 }
@@ -123,7 +123,6 @@ pub fn create_config(
 
     account
 }
-
 
 #[inline]
 pub fn expect_token_balance(result: &InstructionResult, account: Pubkey, expected_balance: u64) {

@@ -2,17 +2,18 @@
 mod tests {
     use mollusk_svm::Mollusk;
     use solana_sdk::{
-        account::{AccountSharedData, ReadableAccount}, instruction::{AccountMeta, Instruction}, pubkey::Pubkey
+        account::{AccountSharedData, ReadableAccount},
+        instruction::{AccountMeta, Instruction},
+        pubkey::Pubkey,
     };
 
     #[test]
     fn withdraw() {
         // Define the program ID as a constant Pubkey, same as in the main program
         let program_id = Pubkey::new_from_array([
-            0x7b, 0x07, 0x5a, 0x4f, 0xca, 0x15, 0x61, 0x6e, 
-            0xbe, 0x53, 0xc1, 0xa8, 0x43, 0x6f, 0x42, 0x89, 
-            0x2b, 0x02, 0x1a, 0xb6, 0x62, 0x5a, 0x2a, 0x02, 
-            0x2a, 0x68, 0x9a, 0xef, 0xbd, 0xed, 0x26, 0xef
+            0x7b, 0x07, 0x5a, 0x4f, 0xca, 0x15, 0x61, 0x6e, 0xbe, 0x53, 0xc1, 0xa8, 0x43, 0x6f,
+            0x42, 0x89, 0x2b, 0x02, 0x1a, 0xb6, 0x62, 0x5a, 0x2a, 0x02, 0x2a, 0x68, 0x9a, 0xef,
+            0xbd, 0xed, 0x26, 0xef,
         ]);
 
         // Create a unique `signer` Pubkey and calculate the PDA `vault` based on the `signer` and `program_id`
@@ -37,18 +38,21 @@ mod tests {
         let result: mollusk_svm::result::InstructionResult = mollusk.process_instruction(
             &instruction,
             &vec![
+                (signer, AccountSharedData::new(0, 0, &Pubkey::default())),
                 (
-                    signer,
-                    AccountSharedData::new(0, 0, &Pubkey::default()),
+                    vault,
+                    AccountSharedData::new(1_000_000_000u64, 0, &program_id),
                 ),
-                (vault, AccountSharedData::new(1_000_000_000u64, 0, &program_id)),
             ],
         );
 
         // Verify the final lamports balances after withdrawal:
         // - The `signer` should now hold the withdrawn amount (1,000,000,000 lamports)
         // - The `vault` should be empty, having transferred all lamports to `signer`
-        assert_eq!(result.get_account(&signer).unwrap().lamports(), 1_000_000_000);
+        assert_eq!(
+            result.get_account(&signer).unwrap().lamports(),
+            1_000_000_000
+        );
         assert_eq!(result.get_account(&vault).unwrap().lamports(), 0);
 
         // Ensure that the instruction executed successfully without errors

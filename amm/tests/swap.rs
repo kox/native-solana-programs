@@ -23,33 +23,43 @@ mod swap_tests {
         let mint_y = Pubkey::new_unique();
         let user_x = Pubkey::new_unique();
         let user_y = Pubkey::new_unique();
-        let vault_from= Pubkey::new_unique();
-        let vault_to = Pubkey::new_unique(); 
+        let vault_from = Pubkey::new_unique();
+        let vault_to = Pubkey::new_unique();
 
-        let swap_amount= 1_000_000u64;
+        let swap_amount = 1_000_000u64;
 
         let data = [
-            vec![3],                                // amount
-            1_000_000u64.to_le_bytes().to_vec(),    // mint_x
-            1_000u64.to_le_bytes().to_vec(),        // expiration
+            vec![3],                             // amount
+            1_000_000u64.to_le_bytes().to_vec(), // mint_x
+            1_000u64.to_le_bytes().to_vec(),     // expiration
             i64::MIN.to_le_bytes().to_vec(),
         ]
         .concat();
 
-        let user_x_account = 
+        let user_x_account =
             shared::create_token_account(&mollusk, mint_x, user, 1_000_000_000, token_program);
-        
-        let user_y_account = 
-            shared::create_token_account(&mollusk, mint_y, user, 0, token_program);
 
-        let vault_from_account = 
+        let user_y_account = shared::create_token_account(&mollusk, mint_y, user, 0, token_program);
+
+        let vault_from_account =
             shared::create_token_account(&mollusk, mint_x, authority, 1_000_000_000, token_program);
 
-        let vault_to_account = 
+        let vault_to_account =
             shared::create_token_account(&mollusk, mint_y, authority, 1_000_000_000, token_program);
-        
-    
-        let config_account = shared::create_config(&mollusk, 0, authority, mint_x, mint_y, Pubkey::new_unique(), vault_from, vault_to, 1_000u16, bump, program_id);
+
+        let config_account = shared::create_config(
+            &mollusk,
+            0,
+            authority,
+            mint_x,
+            mint_y,
+            Pubkey::new_unique(),
+            vault_from,
+            vault_to,
+            1_000u16,
+            bump,
+            program_id,
+        );
 
         let instruction = Instruction::new_with_bytes(
             program_id,
@@ -71,14 +81,21 @@ mod swap_tests {
         let result: mollusk_svm::result::InstructionResult = mollusk.process_instruction(
             &instruction,
             &vec![
-                (user, AccountSharedData::new(1_000_000_000u64, 0, &Pubkey::default())),
-                (authority, AccountSharedData::new(1_000_000_000u64, 0, &Pubkey::default())),
+                (
+                    user,
+                    AccountSharedData::new(1_000_000_000u64, 0, &Pubkey::default()),
+                ),
+                (
+                    authority,
+                    AccountSharedData::new(1_000_000_000u64, 0, &Pubkey::default()),
+                ),
                 (user_x, user_x_account),
                 (user_y, user_y_account),
                 (vault_from, vault_from_account),
                 (vault_to, vault_to_account),
                 (config, config_account),
-                (token_program, token_program_account),            ],
+                (token_program, token_program_account),
+            ],
         );
 
         assert!(!result.program_result.is_err());

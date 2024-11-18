@@ -26,13 +26,13 @@ mod deposit_tests {
         let user_y = Pubkey::new_unique();
         let user_lp = Pubkey::new_unique();
         let vault_x = Pubkey::new_unique();
-        let vault_y = Pubkey::new_unique(); 
+        let vault_y = Pubkey::new_unique();
 
-        let transfer_amount= 1_000_000_000u64;
+        let transfer_amount = 1_000_000_000u64;
 
         let data = [
             vec![1],
-            transfer_amount.to_le_bytes().to_vec(), // amount
+            transfer_amount.to_le_bytes().to_vec(),  // amount
             1_000_000_000u64.to_le_bytes().to_vec(), // max_x
             1_000_000_000u64.to_le_bytes().to_vec(), // max_y
             i64::MIN.to_le_bytes().to_vec(),         // expiration
@@ -41,23 +41,26 @@ mod deposit_tests {
 
         let mint_lp_account =
             shared::create_mint_account(&mollusk, authority, 0, 6, true, token_program);
-        
-        let user_x_account = 
+
+        let user_x_account =
             shared::create_token_account(&mollusk, mint_x, user, 1_000_000_000, token_program);
-        
-        let user_y_account = 
+
+        let user_y_account =
             shared::create_token_account(&mollusk, mint_y, user, 1_000_000_000, token_program);
 
-        let vault_x_account = 
+        let vault_x_account =
             shared::create_token_account(&mollusk, mint_x, authority, 0, token_program);
 
-        let vault_y_account = 
+        let vault_y_account =
             shared::create_token_account(&mollusk, mint_y, authority, 0, token_program);
-        
-        let user_lp_account = 
+
+        let user_lp_account =
             shared::create_token_account(&mollusk, mint_lp, user, 0, token_program);
-        
-        let config_account = shared::create_config(&mollusk, 0, authority, mint_x, mint_y, mint_lp, vault_x, vault_y, 1_000u16, bump, program_id);
+
+        let config_account = shared::create_config(
+            &mollusk, 0, authority, mint_x, mint_y, mint_lp, vault_x, vault_y, 1_000u16, bump,
+            program_id,
+        );
 
         let instruction = Instruction::new_with_bytes(
             program_id,
@@ -79,8 +82,14 @@ mod deposit_tests {
         let result: mollusk_svm::result::InstructionResult = mollusk.process_instruction(
             &instruction,
             &vec![
-                (user, AccountSharedData::new(1_000_000_000u64, 0, &Pubkey::default())),
-                (authority, AccountSharedData::new(1_000_000_000u64, 0, &Pubkey::default())),
+                (
+                    user,
+                    AccountSharedData::new(1_000_000_000u64, 0, &Pubkey::default()),
+                ),
+                (
+                    authority,
+                    AccountSharedData::new(1_000_000_000u64, 0, &Pubkey::default()),
+                ),
                 (mint_lp, mint_lp_account),
                 (user_x, user_x_account),
                 (user_y, user_y_account),
@@ -88,7 +97,8 @@ mod deposit_tests {
                 (vault_x, vault_x_account),
                 (vault_y, vault_y_account),
                 (config, config_account),
-                (token_program, token_program_account),            ],
+                (token_program, token_program_account),
+            ],
         );
 
         assert!(!result.program_result.is_err());

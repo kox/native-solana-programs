@@ -69,9 +69,7 @@ mod upvote_tests {
         let data = voting_result_account.data();
 
         // score
-        let score_bytes: [u8; 8] = data[0..8]
-            .try_into()
-            .expect("Expecting 8 bytes for score");
+        let score_bytes: [u8; 8] = data[0..8].try_into().expect("Expecting 8 bytes for score");
         let score_result = u64::from_le_bytes(score_bytes);
         assert_eq!(score_result, 1u64);
     }

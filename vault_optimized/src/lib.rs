@@ -1,8 +1,7 @@
 use five8_const::decode_32_const;
 use pinocchio::{
-    account_info::AccountInfo, ProgramResult, program_error::ProgramError,
-    pubkey::Pubkey,
-    entrypoint
+    account_info::AccountInfo, entrypoint, program_error::ProgramError, pubkey::Pubkey,
+    ProgramResult,
 };
 use solana_nostd_sha256::hashv;
 
@@ -47,12 +46,7 @@ pub fn withdraw(_program_id: &Pubkey, accounts: &[AccountInfo], data: &[u8]) -> 
     let bump = data[8];
 
     // Calculate the expected PDA using the signer public key, bump seed, program ID, and marker
-    let pda = hashv(&[
-        signer.key().as_ref(),
-        &[bump],
-        ID.as_ref(),
-        PDA_MARKER,
-    ]);
+    let pda = hashv(&[signer.key().as_ref(), &[bump], ID.as_ref(), PDA_MARKER]);
 
     // Security Check 2: Assert that the computed PDA matches the `vault` key
     assert_eq!(&pda, vault.key().as_ref());

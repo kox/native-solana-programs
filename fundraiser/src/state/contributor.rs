@@ -1,6 +1,5 @@
 use pinocchio::account_info::AccountInfo;
 
-
 /// # State
 ///
 /// -- Data --
@@ -27,6 +26,6 @@ impl Contributor {
     }
 
     pub fn amount(&self) -> u64 {
-        unsafe  { *(self.0 as *const u64) }
+        unsafe { *(self.0 as *const u64) }
     }
 }

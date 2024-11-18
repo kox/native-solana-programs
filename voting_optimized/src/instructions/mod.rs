@@ -1,7 +1,7 @@
 use pinocchio::program_error::ProgramError;
 
-pub mod upvote;
 pub mod downvote;
+pub mod upvote;
 
 #[derive(Clone, Copy, Debug)]
 pub enum VoteInstruction {
@@ -17,7 +17,7 @@ impl TryFrom<&u8> for VoteInstruction {
         match value {
             0 => Ok(VoteInstruction::UpVote),
             1 => Ok(VoteInstruction::DownVote),
-            _ => Err(ProgramError::InvalidInstructionData)
+            _ => Err(ProgramError::InvalidInstructionData),
         }
     }
 }

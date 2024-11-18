@@ -37,8 +37,8 @@ mod contribute_tests {
             Pubkey::try_find_program_address(&[fundraiser.as_ref()], &PROGRAM_ID).unwrap();
 
         let data = [
-            vec![1], // Second instruction (contribute)
-            1u64.to_le_bytes().to_vec(),  // we contribute with only 1 token fail
+            vec![1],                     // Second instruction (contribute)
+            1u64.to_le_bytes().to_vec(), // we contribute with only 1 token fail
         ]
         .concat();
 
@@ -102,8 +102,8 @@ mod contribute_tests {
             Pubkey::try_find_program_address(&[fundraiser.as_ref()], &PROGRAM_ID).unwrap();
 
         let data = [
-            vec![1], // Second instruction (contribute)
-            1_000_000u64.to_le_bytes().to_vec(),  // we contribute with only 1 token fail
+            vec![1],                             // Second instruction (contribute)
+            1_000_000u64.to_le_bytes().to_vec(), // we contribute with only 1 token fail
         ]
         .concat();
 
@@ -168,8 +168,9 @@ mod contribute_tests {
 
         let data = [
             vec![1], // Second instruction (contribute)
-            1_000_000u64.to_le_bytes().to_vec()
-        ].concat();
+            1_000_000u64.to_le_bytes().to_vec(),
+        ]
+        .concat();
 
         // Instruction
         let instruction = Instruction::new_with_bytes(
@@ -179,7 +180,7 @@ mod contribute_tests {
                 AccountMeta::new(contributor, true),
                 AccountMeta::new(contributor_ta, false),
                 AccountMeta::new(contributor_account, false),
-                AccountMeta::new(fundraiser, false),  // we need to modify it
+                AccountMeta::new(fundraiser, false), // we need to modify it
                 AccountMeta::new(vault, false),
                 AccountMeta::new(authority, true),
                 AccountMeta::new(token_program, false),
@@ -193,10 +194,19 @@ mod contribute_tests {
                     contributor,
                     AccountSharedData::new(1_000_000_000, 0, &Pubkey::default()),
                 ),
-                (contributor_ta, get_ta(&mollusk, mint, contributor, 1_000_000u64, token_program)),
+                (
+                    contributor_ta,
+                    get_ta(&mollusk, mint, contributor, 1_000_000u64, token_program),
+                ),
                 (contributor_account, get_contributor(&mollusk, u64::MIN)), // first time contributing
-                (fundraiser, get_fundraiser(&mollusk, maker, mint, 1_000_000_000u64, u64::MAX, bump)),
-                (vault, get_ta(&mollusk, mint, authority, 2_000u64, token_program)),
+                (
+                    fundraiser,
+                    get_fundraiser(&mollusk, maker, mint, 1_000_000_000u64, u64::MAX, bump),
+                ),
+                (
+                    vault,
+                    get_ta(&mollusk, mint, authority, 2_000u64, token_program),
+                ),
                 (authority, AccountSharedData::new(0, 0, &Pubkey::default())),
                 (token_program, token_program_account),
             ],
@@ -205,7 +215,9 @@ mod contribute_tests {
         assert!(!result.program_result.is_err());
 
         // Fixinig the random error as the order is not quarantee
-        let fundraiser_result_account = result.get_account(&fundraiser).expect("Failed to find funraiser account");
+        let fundraiser_result_account = result
+            .get_account(&fundraiser)
+            .expect("Failed to find funraiser account");
 
         // Fundraiser should be own by the program id to be able to modify it
         assert_eq!(*fundraiser_result_account.owner(), PROGRAM_ID);
@@ -217,37 +229,42 @@ mod contribute_tests {
         let data = fundraiser_result_account.data();
 
         // Maker Pubkey
-        let pubkey_bytes: [u8; 32] = data[0..32].try_into().expect("Expected 32 bytes for pubkey");
+        let pubkey_bytes: [u8; 32] = data[0..32]
+            .try_into()
+            .expect("Expected 32 bytes for pubkey");
         let maker_pubkey = Pubkey::from(pubkey_bytes);
         assert_eq!(maker_pubkey.to_string(), maker.to_string());
 
         // Mint Pubkey
-        let mint_bytes: [u8; 32]  = data[32..64].try_into().expect("Expecting 8 bytes for mint");
+        let mint_bytes: [u8; 32] = data[32..64].try_into().expect("Expecting 8 bytes for mint");
         let mint_pubkey = Pubkey::from(mint_bytes);
         assert_eq!(mint_pubkey.to_string(), mint.to_string());
 
         // Remaining Amount
-        let remaining_amount_bytes: [u8; 8]  = data[64..72].try_into().expect("Expecting 8 bytes for remaining_amount");
+        let remaining_amount_bytes: [u8; 8] = data[64..72]
+            .try_into()
+            .expect("Expecting 8 bytes for remaining_amount");
         let remaining_amount_result = u64::from_le_bytes(remaining_amount_bytes);
         assert_eq!(remaining_amount_result, 999_000_000u64);
-
 
         // Check the tokens happened
         let updated_contributor_ta_account = result
             .get_account(&contributor_ta)
             .expect("Failed to find contributor token account");
-        
+
         // Unpack the updated `contributor_ta` account data to read the token balance
-        let updated_contributor_ta_data: spl_token::state::Account = solana_sdk::program_pack::Pack::unpack(
-            &updated_contributor_ta_account.data(),
-        ).expect("Failed to unpack contributor token account");
+        let updated_contributor_ta_data: spl_token::state::Account =
+            solana_sdk::program_pack::Pack::unpack(&updated_contributor_ta_account.data())
+                .expect("Failed to unpack contributor token account");
 
         // Check the balance of `contributor_ta` after contribution
         let expected_balance = 0; // Assuming the contributor transferred all tokens to the fundraiser
         assert_eq!(updated_contributor_ta_data.amount, expected_balance);
 
         // Fixinig the random error as the order is not quarantee
-        let contributor_result_account = result.get_account(&contributor_account).expect("Failed to find contributor account");
+        let contributor_result_account = result
+            .get_account(&contributor_account)
+            .expect("Failed to find contributor account");
 
         // contributor account should be own by the program id to be able to modify it
         assert_eq!(*contributor_result_account.owner(), PROGRAM_ID);
@@ -259,7 +276,9 @@ mod contribute_tests {
         let contributor_account_data = contributor_result_account.data();
 
         // verify we updated the contribution
-        let contribution_amount_bytes: [u8; 8]  = contributor_account_data[0..8].try_into().expect("Expecting 8 bytes for amount");
+        let contribution_amount_bytes: [u8; 8] = contributor_account_data[0..8]
+            .try_into()
+            .expect("Expecting 8 bytes for amount");
         let contribution_amount_result = u64::from_le_bytes(contribution_amount_bytes);
         assert_eq!(contribution_amount_result, 1_000_000u64);
 
@@ -273,7 +292,6 @@ mod contribute_tests {
         let expected_balance = 1_002_000; // Assuming the contributor added 1000 and there was 2000, there should be 1000 left
 
         assert_eq!(updated_vault_data.amount, expected_balance);
-
     }
 
     #[test]
@@ -294,8 +312,9 @@ mod contribute_tests {
 
         let data = [
             vec![1], // Second instruction (contribute)
-            1_000_000u64.to_le_bytes().to_vec()
-        ].concat();
+            1_000_000u64.to_le_bytes().to_vec(),
+        ]
+        .concat();
 
         // Instruction
         let instruction = Instruction::new_with_bytes(
@@ -305,7 +324,7 @@ mod contribute_tests {
                 AccountMeta::new(contributor, true),
                 AccountMeta::new(contributor_ta, false),
                 AccountMeta::new(contributor_account, false),
-                AccountMeta::new(fundraiser, false),  // we need to modify it
+                AccountMeta::new(fundraiser, false), // we need to modify it
                 AccountMeta::new(vault, false),
                 AccountMeta::new(authority, true),
                 AccountMeta::new(token_program, false),
@@ -319,10 +338,19 @@ mod contribute_tests {
                     contributor,
                     AccountSharedData::new(1_000_000_000, 0, &Pubkey::default()),
                 ),
-                (contributor_ta, get_ta(&mollusk, mint, contributor, 1_000_000u64, token_program)),
+                (
+                    contributor_ta,
+                    get_ta(&mollusk, mint, contributor, 1_000_000u64, token_program),
+                ),
                 (contributor_account, get_contributor(&mollusk, 1_000_000u64)), // second time contributing
-                (fundraiser, get_fundraiser(&mollusk, maker, mint, 1_000u64, u64::MAX, bump)), // almost success (it should remain 0)
-                (vault, get_ta(&mollusk, mint, authority, 1_000_000u64, token_program)),
+                (
+                    fundraiser,
+                    get_fundraiser(&mollusk, maker, mint, 1_000u64, u64::MAX, bump),
+                ), // almost success (it should remain 0)
+                (
+                    vault,
+                    get_ta(&mollusk, mint, authority, 1_000_000u64, token_program),
+                ),
                 (authority, AccountSharedData::new(0, 0, &Pubkey::default())),
                 (token_program, token_program_account),
             ],
@@ -331,7 +359,9 @@ mod contribute_tests {
         assert!(!result.program_result.is_err());
 
         // Fixinig the random error as the order is not quarantee
-        let fundraiser_result_account = result.get_account(&fundraiser).expect("Failed to find funraiser account");
+        let fundraiser_result_account = result
+            .get_account(&fundraiser)
+            .expect("Failed to find funraiser account");
 
         // Fundraiser should be own by the program id to be able to modify it
         assert_eq!(*fundraiser_result_account.owner(), PROGRAM_ID);
@@ -343,37 +373,42 @@ mod contribute_tests {
         let data = fundraiser_result_account.data();
 
         // Maker Pubkey
-        let pubkey_bytes: [u8; 32] = data[0..32].try_into().expect("Expected 32 bytes for pubkey");
+        let pubkey_bytes: [u8; 32] = data[0..32]
+            .try_into()
+            .expect("Expected 32 bytes for pubkey");
         let maker_pubkey = Pubkey::from(pubkey_bytes);
         assert_eq!(maker_pubkey.to_string(), maker.to_string());
 
         // Mint Pubkey
-        let mint_bytes: [u8; 32]  = data[32..64].try_into().expect("Expecting 8 bytes for mint");
+        let mint_bytes: [u8; 32] = data[32..64].try_into().expect("Expecting 8 bytes for mint");
         let mint_pubkey = Pubkey::from(mint_bytes);
         assert_eq!(mint_pubkey.to_string(), mint.to_string());
 
         // Remaining Amount
-        let remaining_amount_bytes: [u8; 8]  = data[64..72].try_into().expect("Expecting 8 bytes for remaining_amount");
+        let remaining_amount_bytes: [u8; 8] = data[64..72]
+            .try_into()
+            .expect("Expecting 8 bytes for remaining_amount");
         let remaining_amount_result = u64::from_le_bytes(remaining_amount_bytes);
         assert_eq!(remaining_amount_result, 0u64);
-
 
         // Check the tokens happened
         let updated_contributor_ta_account = result
             .get_account(&contributor_ta)
             .expect("Failed to find contributor token account");
-        
+
         // Unpack the updated `contributor_ta` account data to read the token balance
-        let updated_contributor_ta_data: spl_token::state::Account = solana_sdk::program_pack::Pack::unpack(
-            &updated_contributor_ta_account.data(),
-        ).expect("Failed to unpack contributor token account");
+        let updated_contributor_ta_data: spl_token::state::Account =
+            solana_sdk::program_pack::Pack::unpack(&updated_contributor_ta_account.data())
+                .expect("Failed to unpack contributor token account");
 
         // Check the balance of `contributor_ta` after contribution
         let expected_balance = 0; // Assuming the contributor transferred all tokens to the fundraiser
         assert_eq!(updated_contributor_ta_data.amount, expected_balance);
 
         // Fixinig the random error as the order is not quarantee
-        let contributor_result_account = result.get_account(&contributor_account).expect("Failed to find contributor account");
+        let contributor_result_account = result
+            .get_account(&contributor_account)
+            .expect("Failed to find contributor account");
 
         // contributor account should be own by the program id to be able to modify it
         assert_eq!(*contributor_result_account.owner(), PROGRAM_ID);
@@ -385,7 +420,9 @@ mod contribute_tests {
         let contributor_account_data = contributor_result_account.data();
 
         // verify we updated the contribution
-        let contribution_amount_bytes: [u8; 8]  = contributor_account_data[0..8].try_into().expect("Expecting 8 bytes for amount");
+        let contribution_amount_bytes: [u8; 8] = contributor_account_data[0..8]
+            .try_into()
+            .expect("Expecting 8 bytes for amount");
         let contribution_amount_result = u64::from_le_bytes(contribution_amount_bytes);
         assert_eq!(contribution_amount_result, 2_000_000u64);
 
@@ -399,9 +436,7 @@ mod contribute_tests {
         let expected_balance = 2_000_000; // Assuming the contributor added 1000 and there was 2000, there should be 1000 left
 
         assert_eq!(updated_vault_data.amount, expected_balance);
-
     }
-
 
     fn get_fundraiser(
         mollusk: &Mollusk,

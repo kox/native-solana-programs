@@ -1,6 +1,5 @@
 use pinocchio::account_info::AccountInfo;
 
-
 /// # VoteState
 ///
 /// -- Data --
@@ -26,6 +25,6 @@ impl VoteState {
     }
 
     pub fn score(&self) -> u64 {
-        unsafe  { *(self.0 as *const u64) }
+        unsafe { *(self.0 as *const u64) }
     }
 }

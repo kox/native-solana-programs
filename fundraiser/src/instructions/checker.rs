@@ -27,14 +27,7 @@ use pinocchio_token::{
 /// > It shoud have expired and it should have reach the fundarise goal and it should be the maker
 ///
 pub fn checker(accounts: &[AccountInfo], _data: &[u8]) -> ProgramResult {
-    let [
-        maker, 
-        maker_ta, 
-        fundraiser, 
-        vault, 
-        authority,
-        _token_program
-    ] = accounts else {
+    let [maker, maker_ta, fundraiser, vault, authority, _token_program] = accounts else {
         return Err(ProgramError::NotEnoughAccountKeys);
     };
 
@@ -43,16 +36,19 @@ pub fn checker(accounts: &[AccountInfo], _data: &[u8]) -> ProgramResult {
     assert!(Clock::get()?.slot > fundraiser_account.slot());
 
     // it should have reach the goal remaining_account == 0
-    assert_eq!(fundraiser_account.remaining_amount(), 0); 
+    assert_eq!(fundraiser_account.remaining_amount(), 0);
 
     assert!(maker.is_signer());
 
-    // We verify that person trying to claim the 
+    // We verify that person trying to claim the
     assert_eq!(&fundraiser_account.maker(), maker.key());
- 
+
     // We need to sign on behalf of the program
     let bump_binding = fundraiser_account.bump().to_le_bytes();
-    let seeds = [Seed::from(fundraiser.key().as_ref()), Seed::from(bump_binding.as_ref())];
+    let seeds = [
+        Seed::from(fundraiser.key().as_ref()),
+        Seed::from(bump_binding.as_ref()),
+    ];
     let signers = [Signer::from(&seeds)];
 
     let vault_amount = unsafe { TokenAccount::from_account_info_unchecked(vault)?.amount() };
@@ -63,10 +59,10 @@ pub fn checker(accounts: &[AccountInfo], _data: &[u8]) -> ProgramResult {
         to: maker_ta,
         authority,
         amount: vault_amount,
-    }.invoke_signed(&signers)?;
+    }
+    .invoke_signed(&signers)?;
 
-
-    // Traditional Close account => 10768 
+    // Traditional Close account => 10768
     CloseAccount {
         account: vault,
         destination: maker,
@@ -76,4 +72,3 @@ pub fn checker(accounts: &[AccountInfo], _data: &[u8]) -> ProgramResult {
 
     Ok(())
 }
-

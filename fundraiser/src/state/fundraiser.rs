@@ -1,6 +1,5 @@
 use pinocchio::{account_info::AccountInfo, pubkey::Pubkey};
 
-
 /// # State
 ///
 /// -- Data --
@@ -30,7 +29,7 @@ impl Fundraiser {
     }
 
     pub fn maker(&self) -> Pubkey {
-        unsafe  { *(self.0 as *const Pubkey) }
+        unsafe { *(self.0 as *const Pubkey) }
     }
 
     pub fn mint(&self) -> Pubkey {

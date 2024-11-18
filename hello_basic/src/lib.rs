@@ -1,4 +1,7 @@
-use solana_program::{account_info::AccountInfo, declare_id, entrypoint, entrypoint::ProgramResult, msg, pubkey::Pubkey};
+use solana_program::{
+    account_info::AccountInfo, declare_id, entrypoint, entrypoint::ProgramResult, msg,
+    pubkey::Pubkey,
+};
 
 declare_id!("22222222222222222222222222222222222222222222");
 
@@ -12,6 +15,6 @@ pub fn process_instruction(
     _instruction_data: &[u8], // Ignored, all helloworld instructions are hellos
 ) -> ProgramResult {
     msg!("Hello World Rust program entrypoint");
-    
+
     Ok(())
 }

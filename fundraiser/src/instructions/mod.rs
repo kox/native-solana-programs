@@ -1,8 +1,8 @@
 use pinocchio::program_error::ProgramError;
 
-pub mod initialize;
-pub mod contribute;
 pub mod checker;
+pub mod contribute;
+pub mod initialize;
 pub mod refund;
 
 #[derive(Clone, Copy, Debug)]
@@ -22,7 +22,7 @@ impl TryFrom<&u8> for FundraiserInstruction {
             1 => Ok(FundraiserInstruction::Contribute),
             2 => Ok(FundraiserInstruction::Checker),
             3 => Ok(FundraiserInstruction::Refund),
-            _ => Err(ProgramError::InvalidInstructionData)
+            _ => Err(ProgramError::InvalidInstructionData),
         }
     }
 }

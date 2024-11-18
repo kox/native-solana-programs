@@ -29,10 +29,10 @@ fn process_instruction(
         .ok_or(ProgramError::InvalidInstructionData)?;
 
     match AmmInstruction::try_from(discriminator)? {
-        AmmInstruction::Initialize =>   initialize(accounts, data),
-        AmmInstruction::Deposit =>      deposit(accounts, data),
-        AmmInstruction::Withdraw =>     withdraw(accounts, data),
-        AmmInstruction::Swap =>         swap(accounts, data),
-        AmmInstruction::Lock =>         lock(accounts),
+        AmmInstruction::Initialize => initialize(accounts, data),
+        AmmInstruction::Deposit => deposit(accounts, data),
+        AmmInstruction::Withdraw => withdraw(accounts, data),
+        AmmInstruction::Swap => swap(accounts, data),
+        AmmInstruction::Lock => lock(accounts),
     }
 }
