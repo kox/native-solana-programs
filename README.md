@@ -1,6 +1,6 @@
 # Advanced Solana Rust Turbin3 Cohort
 
-![Advanced-Rust-Turbin3-Cohort](https://raw.githubusercontent.com/solana-turbin3/Q3T_Sol_kox/e824e102c50ef114c7f901815c50824e0dd61579/turbin3_banner.png)
+![Advanced-Rust-Turbin3-Cohort](https://raw.githubusercontent.com/kox/native-solana-programs/refs/heads/main/turbin3_banner.png)
 
 
 # Hi there 👋, kox here 
