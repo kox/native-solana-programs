@@ -2094,8 +2094,20 @@ dependencies = [
 ]
 
 [[package]]
-name = "marketplace-native"
+name = "marketplace_native"
 version = "0.1.0"
+dependencies = [
+ "bytemuck",
+ "five8_const",
+ "mollusk-svm",
+ "mollusk-token",
+ "pinocchio",
+ "pinocchio-system",
+ "pinocchio-token",
+ "solana-nostd-sha256",
+ "solana-sdk",
+ "spl-token",
+]
 
 [[package]]
 name = "memchr"
