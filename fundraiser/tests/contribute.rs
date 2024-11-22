@@ -23,8 +23,8 @@ mod contribute_tests {
     #[test]
     fn should_fail_when_lower_than_minimun() {
         let mut mollusk = Mollusk::new(&PROGRAM_ID, "../target/deploy/fundraiser");
-        mollusk_token::token::add_program(&mut mollusk);
-        let (token_program, token_program_account) = mollusk_token::token::keyed_account();
+        mollusk_svm_programs_token::token::add_program(&mut mollusk);
+        let (token_program, token_program_account) = mollusk_svm_programs_token::token::keyed_account();
 
         let maker = Pubkey::new_unique();
         let contributor = Pubkey::new_unique();
@@ -88,8 +88,8 @@ mod contribute_tests {
     #[test]
     fn should_fail_when_expired() {
         let mut mollusk = Mollusk::new(&PROGRAM_ID, "../target/deploy/fundraiser");
-        mollusk_token::token::add_program(&mut mollusk);
-        let (token_program, token_program_account) = mollusk_token::token::keyed_account();
+        mollusk_svm_programs_token::token::add_program(&mut mollusk);
+        let (token_program, token_program_account) = mollusk_svm_programs_token::token::keyed_account();
 
         let maker = Pubkey::new_unique();
         let contributor = Pubkey::new_unique();
@@ -153,8 +153,8 @@ mod contribute_tests {
     #[test]
     fn contribute() {
         let mut mollusk = Mollusk::new(&PROGRAM_ID, "../target/deploy/fundraiser");
-        mollusk_token::token::add_program(&mut mollusk);
-        let (token_program, token_program_account) = mollusk_token::token::keyed_account();
+        mollusk_svm_programs_token::token::add_program(&mut mollusk);
+        let (token_program, token_program_account) = mollusk_svm_programs_token::token::keyed_account();
 
         let maker = Pubkey::new_unique();
         let contributor = Pubkey::new_unique();
@@ -297,8 +297,8 @@ mod contribute_tests {
     #[test]
     fn contribute_twice() {
         let mut mollusk = Mollusk::new(&PROGRAM_ID, "../target/deploy/fundraiser");
-        mollusk_token::token::add_program(&mut mollusk);
-        let (token_program, token_program_account) = mollusk_token::token::keyed_account();
+        mollusk_svm_programs_token::token::add_program(&mut mollusk);
+        let (token_program, token_program_account) = mollusk_svm_programs_token::token::keyed_account();
 
         let maker = Pubkey::new_unique();
         let contributor = Pubkey::new_unique();
