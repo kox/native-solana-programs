@@ -34,53 +34,28 @@ jobs:
       - name: Clippy
         run: cargo clippy --all-targets --all-features --no-deps
 
-  build:
+  build_test:
     name: Build
     needs: lint
     runs-on: ubuntu-latest
     steps:
       - name: Git checkout
         uses: actions/checkout@v4
-      - name: Install nightly Rust
-        run: rustup install nightly
-      - name: Use nightly Rust
-        run: rustup override set nightly
-      - name: Install Solana
-        uses: nifty-oss/actions/install-solana@v1
+      - uses: actions/cache@v4
         with:
-          version: ${{ env.SOLANA_VERSION }}
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+          key: cargo-build-sbf-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            cargo-build-sbf-
+      - name: Install Solana using metaplex action
+        uses: metaplex-foundation/actions/install-solana@v1
+        with:
           cache: true
-      - name: Install Protoc
-        uses: arduino/setup-protoc@v3
-      - name: Cache cargo dependencies
-        uses: actions/cache@v4
-        with:
-          path: ${{ env.CARGO_CACHE }}
-          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
-          restore-keys: ${{ runner.os }}-cargo
-      - name: Build
+          version: ${{ env.SOLANA_VERSION }}
+      - name: Build cargo 
         run: cargo build-bpf
+      - name: Test workspace 
+        run: cargo test-bpf
 
-  test:
-    name: Test
-    needs: lint
-    runs-on: ubuntu-latest
-    steps:
-      - name: Git checkout
-        uses: actions/checkout@v4
-      - name: Install nightly Rust
-        run: rustup install nightly
-      - name: Use nightly Rust
-        run: rustup override set nightly
-      - name: Install Protoc
-        uses: arduino/setup-protoc@v3
-      - name: Cache cargo dependencies
-        uses: actions/cache@v4
-        with:
-          path: ${{ env.CARGO_CACHE }}
-          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
-          restore-keys: ${{ runner.os }}-cargo
-      - name: Build
-        run: cargo test
-        
-        
