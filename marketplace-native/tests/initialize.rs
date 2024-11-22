@@ -8,7 +8,7 @@ mod initialize_tests {
 
     use mollusk_svm::result::Check;
     use solana_sdk::{
-        account::{ AccountSharedData, ReadableAccount },
+        account::{AccountSharedData, ReadableAccount},
         instruction::{AccountMeta, Instruction},
         pubkey::Pubkey,
     };
@@ -21,16 +21,19 @@ mod initialize_tests {
         let marketplace = Pubkey::new_unique();
 
         let data = [
-            vec![0],                               // Instruction
-            marker.to_bytes().to_vec(),            // marker
-            u64::MAX.to_le_bytes().to_vec(),       // fee
-            u8::MAX.to_le_bytes().to_vec(),        // authority bump
-            u8::MAX.to_le_bytes().to_vec(),        // authority bump
+            vec![0],                         // Instruction
+            marker.to_bytes().to_vec(),      // marker
+            u64::MAX.to_le_bytes().to_vec(), // fee
+            u8::MAX.to_le_bytes().to_vec(),  // authority bump
+            u8::MAX.to_le_bytes().to_vec(),  // authority bump
         ]
         .concat();
 
-        let instruction =
-            Instruction::new_with_bytes(program_id, &data, vec![AccountMeta::new(marketplace, false)]);
+        let instruction = Instruction::new_with_bytes(
+            program_id,
+            &data,
+            vec![AccountMeta::new(marketplace, false)],
+        );
 
         let lamports = mollusk.sysvars.rent.minimum_balance(Marketplace::LEN);
 

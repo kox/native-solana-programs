@@ -1,4 +1,6 @@
-use pinocchio::{account_info::AccountInfo, program_error::ProgramError, pubkey::Pubkey, ProgramResult};
+use pinocchio::{
+    account_info::AccountInfo, program_error::ProgramError, pubkey::Pubkey, ProgramResult,
+};
 
 /// # Marketplace State
 ///
@@ -17,7 +19,7 @@ impl Marketplace {
     pub const LEN: usize = 32   // maker 
         + 8                     // fee 
         + 1                     // bump
-        + 1;                    // treasury_bump
+        + 1; // treasury_bump
 
     #[inline(always)]
     pub fn init(&self, data: &[u8; Self::LEN]) -> ProgramResult {
@@ -37,7 +39,7 @@ impl Marketplace {
         Ok(Self::from_account_info_unchecked(account_info))
     }
 
-    // We store who owns the marketplace 
+    // We store who owns the marketplace
     #[inline(always)]
     pub fn maker(&self) -> Pubkey {
         unsafe { *(self.0 as *const Pubkey) }

@@ -14,7 +14,8 @@ mod deposit_tests {
     #[test]
     fn deposit() {
         let (mollusk, program_id) = shared::setup();
-        let (token_program, token_program_account) = mollusk_svm_programs_token::token::keyed_account();
+        let (token_program, token_program_account) =
+            mollusk_svm_programs_token::token::keyed_account();
 
         let user = Pubkey::new_unique();
         let config = Pubkey::new_unique();

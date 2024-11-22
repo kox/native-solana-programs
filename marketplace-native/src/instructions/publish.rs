@@ -12,9 +12,9 @@ use pinocchio::{
 // > the marketplace
 // > the token account
 // > price
-// 
+//
 pub fn publish(accounts: &[AccountInfo], data: &[u8]) -> ProgramResult {
-    // let [publisher, marketplace, , _token_program] = accounts 
-    
+    // let [publisher, marketplace, , _token_program] = accounts
+
     Ok(())
 }
