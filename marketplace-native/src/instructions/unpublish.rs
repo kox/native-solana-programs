@@ -3,6 +3,5 @@ use pinocchio::{
 };
 
 pub fn unpublish(accounts: &[AccountInfo], data: &[u8]) -> ProgramResult {
-    
     Ok(())
 }

@@ -3,6 +3,5 @@ use pinocchio::{
 };
 
 pub fn purchase(accounts: &[AccountInfo], data: &[u8]) -> ProgramResult {
-    
     Ok(())
 }
