@@ -18,7 +18,7 @@ pub fn setup() -> (Mollusk, Pubkey) {
     let project_name = format!("../target/deploy/{}", env!("CARGO_PKG_NAME"));
     let mut mollusk = Mollusk::new(&program_id, &project_name);
 
-    mollusk_token::token::add_program(&mut mollusk);
+    mollusk_svm_programs_token::token::add_program(&mut mollusk);
     (mollusk, program_id)
 }
 

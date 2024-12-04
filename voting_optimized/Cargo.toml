@@ -25,7 +25,7 @@ solana-nostd-sha256 = { workspace = true }
 
 [dev-dependencies]
 mollusk-svm = { workspace = true }
-mollusk-token = { workspace = true }
+mollusk-svm-programs-token = { workspace = true }
 solana-sdk = { workspace = true }
 spl-token = { workspace = true }
 

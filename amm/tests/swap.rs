@@ -4,6 +4,7 @@ mod shared;
 #[cfg(test)]
 mod swap_tests {
     use crate::shared::{self};
+    use mollusk_svm_programs_token::token::keyed_account;
 
     use solana_sdk::{
         account::AccountSharedData,
@@ -14,7 +15,7 @@ mod swap_tests {
     #[test]
     fn swap() {
         let (mollusk, program_id) = shared::setup();
-        let (token_program, token_program_account) = mollusk_token::token::keyed_account();
+        let (token_program, token_program_account) = keyed_account();
 
         let user = Pubkey::new_unique();
         let config = Pubkey::new_unique();

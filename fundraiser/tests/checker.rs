@@ -22,8 +22,8 @@ mod checker_tests {
     #[test]
     fn should_fail_when_still_running() {
         let mut mollusk = Mollusk::new(&PROGRAM_ID, "../target/deploy/fundraiser");
-        mollusk_token::token::add_program(&mut mollusk);
-        let (token_program, token_program_account) = mollusk_token::token::keyed_account();
+        mollusk_svm_programs_token::token::add_program(&mut mollusk);
+        let (token_program, token_program_account) = mollusk_svm_programs_token::token::keyed_account();
 
         let maker = Pubkey::new_unique();
         let maker_ta = Pubkey::new_unique();
@@ -83,9 +83,9 @@ mod checker_tests {
     #[test]
     fn should_fail_when_not_reach_goal() {
         let mut mollusk = Mollusk::new(&PROGRAM_ID, "../target/deploy/fundraiser");
-        mollusk_token::token::add_program(&mut mollusk);
+        mollusk_svm_programs_token::token::add_program(&mut mollusk);
         mollusk.sysvars.warp_to_slot(2); // We start in slot 2 so we can test expired (0)
-        let (token_program, token_program_account) = mollusk_token::token::keyed_account();
+        let (token_program, token_program_account) = mollusk_svm_programs_token::token::keyed_account();
 
         let maker = Pubkey::new_unique();
         let maker_ta = Pubkey::new_unique();
@@ -145,9 +145,9 @@ mod checker_tests {
     #[test]
     fn should_fail_when_not_maker_tries_to_claim() {
         let mut mollusk = Mollusk::new(&PROGRAM_ID, "../target/deploy/fundraiser");
-        mollusk_token::token::add_program(&mut mollusk);
+        mollusk_svm_programs_token::token::add_program(&mut mollusk);
         mollusk.sysvars.warp_to_slot(2); // We start in slot 2 so we can test expired (0)
-        let (token_program, token_program_account) = mollusk_token::token::keyed_account();
+        let (token_program, token_program_account) = mollusk_svm_programs_token::token::keyed_account();
 
         let scammer = Pubkey::new_unique();
         let maker = Pubkey::new_unique();
@@ -209,9 +209,9 @@ mod checker_tests {
     #[test]
     fn checker() {
         let mut mollusk = Mollusk::new(&PROGRAM_ID, "../target/deploy/fundraiser");
-        mollusk_token::token::add_program(&mut mollusk);
+        mollusk_svm_programs_token::token::add_program(&mut mollusk);
         mollusk.sysvars.warp_to_slot(2); // We start in slot 2 so we can test expired (0)
-        let (token_program, token_program_account) = mollusk_token::token::keyed_account();
+        let (token_program, token_program_account) = mollusk_svm_programs_token::token::keyed_account();
 
         let maker = Pubkey::new_unique();
         let maker_ta = Pubkey::new_unique();

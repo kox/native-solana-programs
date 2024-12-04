@@ -75,8 +75,8 @@ mod tests {
 
         let mut mollusk = Mollusk::new(&program_id, "../target/deploy/amm");
 
-        mollusk_token::token::add_program(&mut mollusk);
-        let (token_program, token_program_account) = mollusk_token::token::keyed_account();
+        mollusk_svm_programs_token::token::add_program(&mut mollusk);
+        let (token_program, token_program_account) = mollusk_svm_programs_token::token::keyed_account();
 
         let user = Pubkey::new_unique();
         let config = Pubkey::new_unique();
@@ -174,8 +174,8 @@ fn deposit() {
 
     let mut mollusk = Mollusk::new(&program_id, "../target/deploy/amm");
 
-    mollusk_token::token::add_program(&mut mollusk);
-    let (token_program, token_program_account) = mollusk_token::token::keyed_account();
+    mollusk_svm_programs_token::token::add_program(&mut mollusk);
+    let (token_program, token_program_account) = mollusk_svm_programs_token::token::keyed_account();
 
     let user = Pubkey::new_unique();
     let config = Pubkey::new_unique();
@@ -389,8 +389,8 @@ fn deposit() {
 
         let mut mollusk = Mollusk::new(&program_id, "../target/deploy/amm");
 
-        mollusk_token::token::add_program(&mut mollusk);
-        let (token_program, token_program_account) = mollusk_token::token::keyed_account();
+        mollusk_svm_programs_token::token::add_program(&mut mollusk);
+        let (token_program, token_program_account) = mollusk_svm_programs_token::token::keyed_account();
 
         let user = Pubkey::new_unique();
         let config = Pubkey::new_unique();
@@ -603,8 +603,8 @@ fn deposit() {
 
         let mut mollusk = Mollusk::new(&program_id, "target/deploy/native_amm");
 
-        mollusk_token::token::add_program(&mut mollusk);
-        let (token_program, token_program_account) = mollusk_token::token::keyed_account();
+        mollusk_svm_programs_token::token::add_program(&mut mollusk);
+        let (token_program, token_program_account) = mollusk_svm_programs_token::token::keyed_account();
 
         let user = Pubkey::new_unique();
         let config = Pubkey::new_unique();
