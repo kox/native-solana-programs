@@ -4,6 +4,7 @@ mod shared;
 #[cfg(test)]
 mod swap_tests {
     use crate::shared::{self};
+    use mollusk_svm_programs_token::token::keyed_account;
 
     use solana_sdk::{
         account::AccountSharedData,
